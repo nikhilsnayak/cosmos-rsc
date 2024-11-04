@@ -132,7 +132,10 @@ const server = http.createServer(async (req, res) => {
   logger.info(`${req.method} ${parsedUrl.pathname}`, isRSC ? '(RSC)' : '');
 
   try {
-    if (parsedUrl.pathname.endsWith('.js')) {
+    if (parsedUrl.pathname === '/favicon.ico') {
+      res.writeHead(404);
+      res.end()
+    } else if (parsedUrl.pathname.endsWith('.js')) {
       await handlers.serveJavaScript(res, parsedUrl.pathname);
     } else if (!isRSC) {
       await handlers.serveHtml(res);
