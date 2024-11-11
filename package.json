@@ -7,16 +7,14 @@
     "start": " npm run build && npm run server"
   },
   "dependencies": {
-    "react": "^19.0.0-rc-1631855f-20241023",
-    "react-dom": "^19.0.0-rc-1631855f-20241023",
-    "react-server-dom-webpack": "^19.0.0-rc-1631855f-20241023"
-  },
-  "devDependencies": {
     "@babel/core": "7.26.0",
     "@babel/plugin-transform-modules-commonjs": "^7.25.9",
     "@babel/preset-react": "^7.25.9",
     "@babel/register": "^7.25.9",
     "babel-loader": "9.2.1",
-    "webpack": "^5.95.0"
+    "react": "^19.0.0-rc-5c56b873-20241107",
+    "react-dom": "^19.0.0-rc-5c56b873-20241107",
+    "react-server-dom-webpack": "^19.0.0-rc-5c56b873-20241107",
+    "webpack": "^5.96.1"
   }
 }
