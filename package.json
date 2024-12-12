@@ -1,5 +1,5 @@
 {
-  "name": "cosmos",
+  "name": "cosmos-rsc",
   "version": "0.1.0",
   "scripts": {
     "build": "node --env-file=.env build.js",
