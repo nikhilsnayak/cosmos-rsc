@@ -10,11 +10,15 @@ babelRegister({
 
 const http = require('http');
 const { readFile } = require('fs/promises');
-const { renderToPipeableStream } = require('react-server-dom-webpack/server');
+const {
+  renderToPipeableStream,
+  decodeReplyFromBusboy,
+} = require('react-server-dom-webpack/server.node');
 const path = require('path');
 const React = require('react');
 const url = require('url');
 const util = require('util');
+const Busboy = require('busboy');
 
 const PORT = process.env.PORT ?? 8008;
 const DIST_DIR = path.resolve(__dirname, './dist');
@@ -93,7 +97,12 @@ const handlers = {
     }
   },
 
-  async serveRSC(res, pathname, searchParams) {
+  async serveRSC(
+    res,
+    pathname,
+    searchParams,
+    serverFunctionResult = '$$RSC_ONLY'
+  ) {
     try {
       const manifestPath = path.join(DIST_DIR, 'react-client-manifest.json');
       const moduleMap = await fileHelpers.readJsonFile(manifestPath);
@@ -105,10 +114,13 @@ const handlers = {
         throw new Error(`No default export found in ${pagePath}`);
       }
 
-      const { pipe } = renderToPipeableStream(
-        React.createElement(Page, { searchParams }),
-        moduleMap
-      );
+      let Component = React.createElement(Page, { searchParams });
+
+      if (serverFunctionResult !== '$$RSC_ONLY') {
+        Component = { rscPayload: Component, serverFunctionResult };
+      }
+
+      const { pipe } = renderToPipeableStream(Component, moduleMap);
 
       res.writeHead(200, {
         'Content-Type': 'text/x-component',
@@ -132,16 +144,36 @@ const server = http.createServer(async (req, res) => {
   logger.info(`${req.method} ${parsedUrl.pathname}`, isRSC ? '(RSC)' : '');
 
   try {
-    if (parsedUrl.pathname === '/favicon.ico') {
-      res.writeHead(404);
-      res.end();
-    } else if (parsedUrl.pathname.endsWith('.js')) {
-      await handlers.serveJavaScript(res, parsedUrl.pathname);
-    } else if (!isRSC) {
-      await handlers.serveHtml(res);
-    } else {
-      delete searchParams._rsc;
-      await handlers.serveRSC(res, parsedUrl.pathname, searchParams);
+    if (req.method === 'GET') {
+      if (parsedUrl.pathname === '/favicon.ico') {
+        res.writeHead(404);
+        res.end();
+      } else if (parsedUrl.pathname.endsWith('.js')) {
+        await handlers.serveJavaScript(res, parsedUrl.pathname);
+      } else if (!isRSC) {
+        await handlers.serveHtml(res);
+      } else {
+        delete searchParams._rsc;
+        await handlers.serveRSC(res, parsedUrl.pathname, searchParams);
+      }
+    } else if (req.method === 'POST') {
+      const serverFunctionId = req.headers['server-function-id'];
+      const [fileUrl, functionName] = serverFunctionId.split('#');
+      const path = url.fileURLToPath(fileUrl);
+      const serverFunction = require(path)[functionName];
+
+      const busboy = Busboy({ headers: req.headers });
+      req.pipe(busboy);
+
+      const args = await decodeReplyFromBusboy(busboy);
+      const serverFunctionResult = await serverFunction.apply(null, args);
+
+      await handlers.serveRSC(
+        res,
+        parsedUrl.pathname,
+        searchParams,
+        serverFunctionResult ?? '$$RSC_ONLY'
+      );
     }
   } catch (error) {
     logger.error('Unhandled server error', error);

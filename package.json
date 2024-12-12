@@ -12,6 +12,7 @@
     "@babel/preset-react": "^7.26.3",
     "@babel/register": "^7.25.9",
     "babel-loader": "^9.2.1",
+    "busboy": "^1.6.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-server-dom-webpack": "^19.0.0",

@@ -7,12 +7,44 @@ import {
   useEffect,
   startTransition,
 } from 'react';
-import { createFromFetch } from 'react-server-dom-webpack/client';
+import {
+  createFromReadableStream,
+  encodeReply,
+} from 'react-server-dom-webpack/client';
 import { ErrorBoundary } from './error-boundary';
 
 function getFullPath(url) {
   const { pathname, search } = new URL(url, window.location.origin);
   return `${pathname}${search ? `${search}&_rsc=true` : '?_rsc=true'}`;
+}
+
+let updateRouterState;
+
+async function callServer(id, args) {
+  const path = getFullPath(window.location.href);
+
+  const response = await fetch(path, {
+    method: 'POST',
+    headers: {
+      'server-function-id': id,
+    },
+    body: await encodeReply(args),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to execute server function');
+  }
+
+  const { rscPayload, serverFunctionResult } = await createFromReadableStream(
+    response.body,
+    {
+      callServer,
+    }
+  );
+
+  updateRouterState?.(rscPayload);
+
+  return serverFunctionResult;
 }
 
 async function getRSCPayload(url) {
@@ -21,13 +53,25 @@ async function getRSCPayload(url) {
   if (!response.ok) {
     throw new Error('Failed to fetch RSC Payload');
   }
-  const rscPayload = await createFromFetch(Promise.resolve(response));
+  const rscPayload = await createFromReadableStream(response.body, {
+    callServer,
+  });
   return { path, rscPayload };
 }
 
 async function routerReducer(prevState, action) {
   if (action.type !== 'PUSH' && action.type !== 'NAVIGATE') {
     return prevState;
+  }
+
+  if (action.type === 'UPDATE') {
+    const path = getFullPath(window.location.href);
+    const cache = new Map(prevState.cache);
+    cache.set(path, action.payload);
+    return {
+      routerState: action.payload,
+      cache,
+    };
   }
 
   const { url } = action.payload;
@@ -78,6 +122,12 @@ function RouterProvider({ initialState }) {
 
   const navigate = createDispatcher('NAVIGATE');
   const push = createDispatcher('PUSH');
+
+  updateRouterState = (routerState) => {
+    startTransition(() => {
+      dispatch({ type: 'UPDATE', payload: routerState });
+    });
+  };
 
   useEffect(() => {
     const handlePopState = () => navigate(window.location.href);
