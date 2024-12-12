@@ -108,7 +108,14 @@ const handlers = {
       const moduleMap = await fileHelpers.readJsonFile(manifestPath);
 
       const pagePath = `./pages${pathname}`;
-      const Page = require(pagePath).default;
+      let Page;
+
+      try {
+        Page = require(pagePath).default;
+      } catch (error) {
+        res.writeHead(404);
+        return res.end('PAGE NOT FOUND');
+      }
 
       if (!Page) {
         throw new Error(`No default export found in ${pagePath}`);

@@ -50,8 +50,10 @@ async function callServer(id, args) {
 async function getRSCPayload(url) {
   const path = getFullPath(url);
   const response = await fetch(path);
+
   if (!response.ok) {
-    throw new Error('Failed to fetch RSC Payload');
+    const message = await response.text();
+    throw new Error(message ?? 'Failed to fetch RSC Payload');
   }
   const rscPayload = await createFromReadableStream(response.body, {
     callServer,
@@ -151,9 +153,5 @@ export function Router() {
     cache: new Map([[path, rscPayload]]),
   };
 
-  return (
-    <ErrorBoundary>
-      <RouterProvider initialState={initialState} />
-    </ErrorBoundary>
-  );
+  return <RouterProvider initialState={initialState} />;
 }
