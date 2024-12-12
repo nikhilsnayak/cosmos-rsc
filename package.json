@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "scripts": {
     "build": "node --env-file=.env build.js",
-    "server": "node --env-file=.env --conditions=react-server server.js",
-    "start": " npm run build && npm run server"
+    "rsc-server": "node --env-file=.env --conditions=react-server rsc-server.js",
+    "start": " npm run build && npm run rsc-server"
   },
   "dependencies": {
     "@babel/core": "^7.26.0",
