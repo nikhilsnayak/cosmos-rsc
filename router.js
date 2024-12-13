@@ -162,10 +162,13 @@ function RouterProvider({ initialState }) {
   );
 }
 
-const initialRSCPayloadPromise = getRSCPayload(window.location.href);
+const initialRSCPayloadPromise = createFromReadableStream(rscStream, {
+  callServer,
+});
 
 export function Router() {
-  const { path, rscPayload } = use(initialRSCPayloadPromise);
+  const rscPayload = use(initialRSCPayloadPromise);
+  const path = getFullPath(window.location.href);
   const initialState = {
     routerState: rscPayload,
     cache: new Map([[path, rscPayload]]),

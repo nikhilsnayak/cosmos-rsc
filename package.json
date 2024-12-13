@@ -4,7 +4,8 @@
   "scripts": {
     "build": "node --env-file=.env build.js",
     "rsc-server": "node --env-file=.env --conditions=react-server rsc-server.js",
-    "start": " npm run build && npm run rsc-server"
+    "ssr-server": "node --env-file=.env ssr-server.js",
+    "start": " npm run build && concurrently \"npm run rsc-server\" \"npm run ssr-server\""
   },
   "dependencies": {
     "@babel/core": "^7.26.0",
@@ -13,9 +14,11 @@
     "@babel/register": "^7.25.9",
     "babel-loader": "^9.2.1",
     "busboy": "^1.6.0",
+    "concurrently": "^9.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-server-dom-webpack": "^19.0.0",
+    "rsc-html-stream": "^0.0.4",
     "webpack": "^5.97.1"
   }
 }
