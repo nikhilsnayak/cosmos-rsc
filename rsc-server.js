@@ -146,9 +146,9 @@ const handlers = {
 const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const searchParams = { ...parsedUrl.query };
-  const isRSC = searchParams._rsc;
+  const isRSCRequest = req.headers.accept === 'text/x-component';
 
-  logger.info(`${req.method} ${parsedUrl.pathname}`, isRSC ? '(RSC)' : '');
+  logger.info(`${req.method} ${parsedUrl.pathname}`, isRSCRequest ? '(RSC)' : '');
 
   try {
     if (req.method === 'GET') {
@@ -157,13 +157,12 @@ const server = http.createServer(async (req, res) => {
         res.end();
       } else if (parsedUrl.pathname.endsWith('.js')) {
         await handlers.serveJavaScript(res, parsedUrl.pathname);
-      } else if (!isRSC) {
-        await handlers.serveHtml(res);
-      } else {
-        delete searchParams._rsc;
+      } else if (isRSCRequest) {
         await handlers.serveRSC(res, parsedUrl.pathname, searchParams);
+      } else {
+        await handlers.serveHtml(res);
       }
-    } else if (req.method === 'POST') {
+    } else if (req.method === 'POST' && isRSCRequest) {
       const serverFunctionId = req.headers['server-function-id'];
       const [fileUrl, functionName] = serverFunctionId.split('#');
       const path = url.fileURLToPath(fileUrl);

@@ -11,11 +11,10 @@ import {
   createFromReadableStream,
   encodeReply,
 } from 'react-server-dom-webpack/client';
-import { ErrorBoundary } from './error-boundary';
 
 function getFullPath(url) {
   const { pathname, search } = new URL(url, window.location.origin);
-  return `${pathname}${search ? `${search}&_rsc=true` : '?_rsc=true'}`;
+  return `${pathname}${search}`;
 }
 
 let updateRouterState;
@@ -23,11 +22,13 @@ let updateRouterState;
 async function callServer(id, args) {
   const path = getFullPath(window.location.href);
 
+  const headers = new Headers();
+  headers.append('server-function-id', id);
+  headers.append('accept', 'text/x-component');
+
   const response = await fetch(path, {
     method: 'POST',
-    headers: {
-      'server-function-id': id,
-    },
+    headers,
     body: await encodeReply(args),
   });
 
@@ -49,7 +50,11 @@ async function callServer(id, args) {
 
 async function getRSCPayload(url) {
   const path = getFullPath(url);
-  const response = await fetch(path);
+
+  const headers = new Headers();
+  headers.append('accept', 'text/x-component');
+
+  const response = await fetch(path, { headers });
 
   if (!response.ok) {
     const message = await response.text();
@@ -62,42 +67,55 @@ async function getRSCPayload(url) {
 }
 
 async function routerReducer(prevState, action) {
-  if (action.type !== 'PUSH' && action.type !== 'NAVIGATE') {
-    return prevState;
+  switch (action.type) {
+    case 'UPDATE': {
+      const path = getFullPath(window.location.href);
+      const cache = new Map(prevState.cache);
+      cache.set(path, action.payload);
+      return {
+        routerState: action.payload,
+        cache,
+      };
+    }
+
+    case 'NAVIGATE': {
+      const { url } = action.payload;
+      const fullPath = getFullPath(url);
+
+      if (prevState.cache.has(fullPath)) {
+        return {
+          ...prevState,
+          routerState: prevState.cache.get(fullPath),
+        };
+      }
+
+      const { path, rscPayload } = await getRSCPayload(url);
+      const cache = new Map(prevState.cache);
+      cache.set(path, rscPayload);
+
+      return {
+        routerState: rscPayload,
+        cache,
+      };
+    }
+
+    case 'PUSH': {
+      const { url } = action.payload;
+      const { path, rscPayload } = await getRSCPayload(url);
+      const cache = new Map(prevState.cache);
+      cache.set(path, rscPayload);
+
+      window.history.pushState(null, null, url);
+
+      return {
+        routerState: rscPayload,
+        cache,
+      };
+    }
+
+    default:
+      return prevState;
   }
-
-  if (action.type === 'UPDATE') {
-    const path = getFullPath(window.location.href);
-    const cache = new Map(prevState.cache);
-    cache.set(path, action.payload);
-    return {
-      routerState: action.payload,
-      cache,
-    };
-  }
-
-  const { url } = action.payload;
-  const fullPath = getFullPath(url);
-
-  if (action.type === 'NAVIGATE' && prevState.cache.has(fullPath)) {
-    return {
-      ...prevState,
-      routerState: prevState.cache.get(fullPath),
-    };
-  }
-
-  const { path, rscPayload } = await getRSCPayload(url);
-  const cache = new Map(prevState.cache);
-  cache.set(path, rscPayload);
-
-  if (action.type === 'PUSH') {
-    window.history.pushState(null, null, url);
-  }
-
-  return {
-    routerState: rscPayload,
-    cache,
-  };
 }
 
 const RouterContext = createContext(null);
