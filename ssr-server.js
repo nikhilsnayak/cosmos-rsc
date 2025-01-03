@@ -1,15 +1,16 @@
+const { register } = require('module');
 const http = require('http');
 const path = require('path');
 const url = require('url');
+const { renderToPipeableStream } = require('react-dom/server');
+const { createFromNodeStream } = require('react-server-dom-webpack/client');
 const logger = require('./logger');
 const fileHelpers = require('./file-helpers');
-const { renderToReadableStream } = require('react-dom/server.edge');
-const {
-  createFromReadableStream,
-} = require('react-server-dom-webpack/client.edge');
-const { injectRSCPayload } = require('rsc-html-stream/server');
-const { Readable } = require('stream');
+const { DIST_DIR } = require('./constants');
+const teeStream = require('./tee-stream');
+const injectRSCPayload = require('./inject-rsc-payload');
 
+register('./ssr-loader.js', url.pathToFileURL('./'));
 const PORT = 8000;
 
 async function serveJavaScript(res, pathname) {
@@ -50,47 +51,43 @@ const server = http.createServer(async (req, res) => {
         headers: req.headers,
       };
 
-      const proxyReq = http.request(options, async (proxyRes) => {
-        proxyRes.headers['content-type'] = isRSC
+      const rscReq = http.request(options, async (rscRes) => {
+        rscRes.headers['content-type'] = isRSC
           ? 'text/x-component'
           : 'text/html';
-        res.writeHead(proxyRes.statusCode, proxyRes.headers);
+        res.writeHead(rscRes.statusCode, rscRes.headers);
 
         if (isRSC) {
-          proxyRes.pipe(res);
+          rscRes.pipe(res);
         } else {
+          const manifestPath = path.join(DIST_DIR, 'react-ssr-manifest.json');
           const serverConsumerManifest = await fileHelpers.readJsonFile(
-            path.join(
-              path.resolve(__dirname, './dist'),
-              'react-ssr-manifest.json'
-            )
+            manifestPath
           );
 
-          const rscStream = Readable.toWeb(proxyRes);
+          const [rscStream1, rscStream2] = teeStream(rscRes);
 
-          const [rscStream1, rscStream2] = rscStream.tee();
+          const root = await createFromNodeStream(
+            rscStream1,
+            serverConsumerManifest
+          );
 
-          const reactElements = await createFromReadableStream(rscStream1, {
-            serverConsumerManifest,
-          });
-
-          const htmlStream = await renderToReadableStream(reactElements, {
+          const html = renderToPipeableStream(root, {
             bootstrapScripts: ['/client.js'],
+            onShellReady: () => {
+              html.pipe(injectRSCPayload(rscStream2)).pipe(res);
+            },
           });
-
-          const response = htmlStream.pipeThrough(injectRSCPayload(rscStream2));
-
-          Readable.fromWeb(response).pipe(res);
         }
       });
 
-      proxyReq.on('error', (err) => {
+      rscReq.on('error', (err) => {
         logger.error('Proxy request error', err);
         res.writeHead(500);
         res.end('Internal Server Error');
       });
 
-      req.pipe(proxyReq);
+      req.pipe(rscReq);
     }
   } catch (error) {
     logger.error('Unhandled server error', error);

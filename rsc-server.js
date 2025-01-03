@@ -1,8 +1,5 @@
-const register = require('react-server-dom-webpack/node-register');
-register();
-
-const babelRegister = require('@babel/register');
-babelRegister({
+require('react-server-dom-webpack/node-register')();
+require('@babel/register')({
   ignore: [/[\\\/](dist|node_modules)[\\\/]/],
   presets: [['@babel/preset-react', { runtime: 'automatic' }]],
   plugins: ['@babel/transform-modules-commonjs'],
@@ -20,6 +17,7 @@ const Busboy = require('busboy');
 
 const logger = require('./logger');
 const fileHelpers = require('./file-helpers');
+const { DIST_DIR } = require('./constants');
 
 const PORT = 8008;
 
@@ -29,10 +27,7 @@ async function serveRSC(
   searchParams,
   serverFunctionResult = '$$RSC_ONLY'
 ) {
-  const manifestPath = path.join(
-    path.resolve(__dirname, './dist'),
-    'react-client-manifest.json'
-  );
+  const manifestPath = path.join(DIST_DIR, 'react-client-manifest.json');
   const moduleMap = await fileHelpers.readJsonFile(manifestPath);
 
   const pagePath = `./pages${pathname}`;

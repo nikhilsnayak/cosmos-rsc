@@ -162,6 +162,37 @@ function RouterProvider({ initialState }) {
   );
 }
 
+const encoder = new TextEncoder();
+let streamController;
+export let rscStream = new ReadableStream({
+  start(controller) {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    let handleChunk = (chunk) => {
+      if (typeof chunk === 'string') {
+        controller.enqueue(encoder.encode(chunk));
+      } else {
+        controller.enqueue(chunk);
+      }
+    };
+    window.__RSC_PAYLOAD ||= [];
+    window.__RSC_PAYLOAD.forEach(handleChunk);
+    window.__RSC_PAYLOAD.push = (chunk) => {
+      handleChunk(chunk);
+    };
+    streamController = controller;
+  },
+});
+
+if (typeof document !== 'undefined' && document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    streamController?.close();
+  });
+} else {
+  streamController?.close();
+}
+
 const initialRSCPayloadPromise = createFromReadableStream(rscStream, {
   callServer,
 });
