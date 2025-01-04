@@ -3,9 +3,12 @@ const fs = require('fs');
 const webpack = require('webpack');
 const util = require('util');
 
-const config = require('./webpack.config');
+const config = require('../config/webpack.config');
 
-fs.rmSync(path.resolve(__dirname, './dist'), { recursive: true, force: true });
+fs.rmSync(path.resolve(__dirname, '../../dist'), {
+  recursive: true,
+  force: true,
+});
 
 const compiler = webpack(config);
 

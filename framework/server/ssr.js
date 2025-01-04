@@ -4,18 +4,18 @@ const path = require('path');
 const url = require('url');
 const { renderToPipeableStream } = require('react-dom/server');
 const { createFromNodeStream } = require('react-server-dom-webpack/client');
-const logger = require('./logger');
-const fileHelpers = require('./file-helpers');
-const { DIST_DIR } = require('./constants');
-const teeStream = require('./tee-stream');
-const injectRSCPayload = require('./inject-rsc-payload');
+const logger = require('../lib/logger');
+const fileHelpers = require('../lib/file-helpers');
+const injectRSCPayload = require('../lib/inject-rsc-payload');
+const teeStream = require('../lib/tee-stream');
+const { DIST_DIR } = require('../lib/constants');
 
-register('./ssr-loader.js', url.pathToFileURL('./'));
+register('./framework/loaders/ssr.js', url.pathToFileURL('./'));
 const PORT = 8000;
 
 async function serveJavaScript(res, pathname) {
   try {
-    const filePath = path.join(path.resolve(__dirname, './dist'), pathname);
+    const filePath = path.join(DIST_DIR, pathname);
     const content = await fileHelpers.readFile(filePath);
     res.writeHead(200, {
       'Content-Type': 'application/javascript',
@@ -34,8 +34,6 @@ const server = http.createServer(async (req, res) => {
 
   logger.info(`${req.method} ${parsedUrl.pathname}`);
 
-  const isRSC = req.headers.accept === 'text/x-component';
-
   try {
     if (parsedUrl.pathname === '/favicon.ico') {
       res.writeHead(404);
@@ -52,9 +50,12 @@ const server = http.createServer(async (req, res) => {
       };
 
       const rscReq = http.request(options, async (rscRes) => {
+        const isRSC = req.headers.accept === 'text/x-component';
+
         rscRes.headers['content-type'] = isRSC
           ? 'text/x-component'
           : 'text/html';
+
         res.writeHead(rscRes.statusCode, rscRes.headers);
 
         if (isRSC) {
@@ -67,12 +68,12 @@ const server = http.createServer(async (req, res) => {
 
           const [rscStream1, rscStream2] = teeStream(rscRes);
 
-          const root = await createFromNodeStream(
+          const { rscPayload } = await createFromNodeStream(
             rscStream1,
             serverConsumerManifest
           );
 
-          const html = renderToPipeableStream(root, {
+          const html = renderToPipeableStream(rscPayload, {
             bootstrapScripts: ['/client.js'],
             onShellReady: () => {
               html.pipe(injectRSCPayload(rscStream2)).pipe(res);

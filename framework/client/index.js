@@ -1,16 +1,11 @@
-'use client';
-
-import {
-  createContext,
-  useActionState,
-  use,
-  useEffect,
-  startTransition,
-} from 'react';
+import { useActionState, useEffect, startTransition } from 'react';
+import { hydrateRoot } from 'react-dom/client';
 import {
   createFromReadableStream,
   encodeReply,
 } from 'react-server-dom-webpack/client';
+import { RouterContext } from './router';
+import { ErrorBoundary } from './error-boundary';
 
 function getFullPath(url) {
   const { pathname, search } = new URL(url, window.location.origin);
@@ -60,7 +55,7 @@ async function getRSCPayload(url) {
     const message = await response.text();
     throw new Error(message ?? 'Failed to fetch RSC Payload');
   }
-  const rscPayload = await createFromReadableStream(response.body, {
+  const { rscPayload } = await createFromReadableStream(response.body, {
     callServer,
   });
   return { path, rscPayload };
@@ -118,16 +113,6 @@ async function routerReducer(prevState, action) {
   }
 }
 
-const RouterContext = createContext(null);
-
-export function useRouter() {
-  const context = use(RouterContext);
-  if (context === null) {
-    throw new Error('Router was not mounted');
-  }
-  return context;
-}
-
 function RouterProvider({ initialState }) {
   const [{ routerState }, dispatch, isTransitioning] = useActionState(
     routerReducer,
@@ -162,48 +147,58 @@ function RouterProvider({ initialState }) {
   );
 }
 
-const encoder = new TextEncoder();
-let streamController;
-export let rscStream = new ReadableStream({
-  start(controller) {
-    if (typeof window === 'undefined') {
-      return;
-    }
-    let handleChunk = (chunk) => {
-      if (typeof chunk === 'string') {
-        controller.enqueue(encoder.encode(chunk));
-      } else {
-        controller.enqueue(chunk);
-      }
-    };
-    window.__RSC_PAYLOAD ||= [];
-    window.__RSC_PAYLOAD.forEach(handleChunk);
-    window.__RSC_PAYLOAD.push = (chunk) => {
-      handleChunk(chunk);
-    };
-    streamController = controller;
-  },
-});
-
-if (typeof document !== 'undefined' && document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    streamController?.close();
-  });
-} else {
-  streamController?.close();
-}
-
-const initialRSCPayloadPromise = createFromReadableStream(rscStream, {
-  callServer,
-});
-
-export function Router() {
-  const rscPayload = use(initialRSCPayloadPromise);
+export function Router({ routerState }) {
   const path = getFullPath(window.location.href);
   const initialState = {
-    routerState: rscPayload,
-    cache: new Map([[path, rscPayload]]),
+    routerState,
+    cache: new Map([[path, routerState]]),
   };
 
   return <RouterProvider initialState={initialState} />;
 }
+
+async function hydrateDocument() {
+  let streamController;
+  const encoder = new TextEncoder();
+  const rscStream = new ReadableStream({
+    start(controller) {
+      let handleChunk = (chunk) => {
+        if (typeof chunk === 'string') {
+          controller.enqueue(encoder.encode(chunk));
+        } else {
+          controller.enqueue(chunk);
+        }
+      };
+      window.__RSC_PAYLOAD ||= [];
+      window.__RSC_PAYLOAD.forEach(handleChunk);
+      window.__RSC_PAYLOAD.push = (chunk) => {
+        handleChunk(chunk);
+      };
+      streamController = controller;
+    },
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      streamController?.close();
+    });
+  } else {
+    streamController?.close();
+  }
+
+  const { rscPayload, formState } = await createFromReadableStream(rscStream, {
+    callServer,
+  });
+
+  hydrateRoot(
+    document,
+    <ErrorBoundary>
+      <Router routerState={rscPayload} />
+    </ErrorBoundary>,
+    {
+      formState,
+    }
+  );
+}
+
+hydrateDocument();
