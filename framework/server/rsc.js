@@ -9,15 +9,18 @@ const http = require('http');
 const {
   renderToPipeableStream,
   decodeReplyFromBusboy,
-} = require('react-server-dom-webpack/server.node');
+  decodeAction,
+  decodeFormState,
+} = require('react-server-dom-webpack/server');
 const path = require('path');
 const React = require('react');
 const url = require('url');
 const Busboy = require('busboy');
+const { Readable } = require('stream');
 
-const logger = require('./logger');
-const fileHelpers = require('./file-helpers');
-const { DIST_DIR } = require('./constants');
+const logger = require('../lib/logger');
+const fileHelpers = require('../lib/file-helpers');
+const { DIST_DIR } = require('../lib/constants');
 
 const PORT = 8008;
 
@@ -25,12 +28,13 @@ async function serveRSC(
   res,
   pathname,
   searchParams,
-  serverFunctionResult = '$$RSC_ONLY'
+  serverFunctionResult,
+  formState
 ) {
   const manifestPath = path.join(DIST_DIR, 'react-client-manifest.json');
   const moduleMap = await fileHelpers.readJsonFile(manifestPath);
 
-  const pagePath = `./pages${pathname}`;
+  const pagePath = `../../src/pages${pathname}`;
   let Page;
 
   try {
@@ -44,19 +48,18 @@ async function serveRSC(
     throw new Error(`No default export found in ${pagePath}`);
   }
 
-  const Layout = require('./layout').default;
+  const RootLayout = require('../../src/root-layout').default;
 
-  let Component = React.createElement(
-    Layout,
+  const Component = React.createElement(
+    RootLayout,
     null,
     React.createElement(Page, { searchParams })
   );
 
-  if (serverFunctionResult !== '$$RSC_ONLY') {
-    Component = { rscPayload: Component, serverFunctionResult };
-  }
-
-  const { pipe } = renderToPipeableStream(Component, moduleMap);
+  const { pipe } = renderToPipeableStream(
+    { rscPayload: Component, serverFunctionResult, formState },
+    moduleMap
+  );
 
   res.writeHead(200, {
     'Content-Type': 'text/x-component',
@@ -77,25 +80,42 @@ const server = http.createServer(async (req, res) => {
       await serveRSC(res, parsedUrl.pathname, searchParams);
     } else if (req.method === 'POST') {
       const serverFunctionId = req.headers['server-function-id'];
-      const [fileUrl, functionName] = serverFunctionId.split('#');
-      const path = url.fileURLToPath(fileUrl);
-      const serverFunction = require(path)[functionName];
 
-      const busboy = Busboy({ headers: req.headers });
-      req.pipe(busboy);
+      let serverFunctionResult;
+      let formState;
+      if (serverFunctionId) {
+        const [fileUrl, functionName] = serverFunctionId.split('#');
+        const path = url.fileURLToPath(fileUrl);
+        const serverFunction = require(path)[functionName];
 
-      const args = await decodeReplyFromBusboy(busboy);
-      const serverFunctionResult = await serverFunction.apply(null, args);
+        const busboy = Busboy({ headers: req.headers });
+        req.pipe(busboy);
+
+        const args = await decodeReplyFromBusboy(busboy);
+        serverFunctionResult = await serverFunction.apply(null, args);
+      } else {
+        const fakeReq = new Request('http://localhost', {
+          method: 'POST',
+          headers: { 'Content-Type': req.headers['content-type'] },
+          body: Readable.toWeb(req),
+          duplex: 'half',
+        });
+        const formData = await fakeReq.formData();
+        const action = await decodeAction(formData);
+        const result = await action();
+        formState = decodeFormState(result, formData);
+      }
 
       await serveRSC(
         res,
         parsedUrl.pathname,
         searchParams,
-        serverFunctionResult ?? '$$RSC_ONLY'
+        serverFunctionResult,
+        formState
       );
     }
   } catch (error) {
-    logger.error(`Failed to render RSC for ${pathname}`, error);
+    logger.error(`Failed to render RSC for ${parsedUrl.pathname}`, error);
     res.writeHead(500);
     res.end('Internal Server Error');
   }

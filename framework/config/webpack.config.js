@@ -5,9 +5,9 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 module.exports = {
   mode: isProduction ? 'production' : 'development',
-  entry: [path.resolve(__dirname, './client.js')],
+  entry: [path.resolve(__dirname, '../client/index.js')],
   output: {
-    path: path.resolve(__dirname, './dist'),
+    path: path.resolve(__dirname, '../../dist'),
     filename: 'client.js',
   },
   module: {
@@ -31,5 +31,21 @@ module.exports = {
       },
     ],
   },
-  plugins: [new ReactServerWebpackPlugin({ isServer: false })],
+  plugins: [
+    new ReactServerWebpackPlugin({
+      isServer: false,
+      clientReferences: [
+        {
+          directory: './src',
+          recursive: true,
+          include: /\.js$/,
+        },
+        {
+          directory: './framework/client',
+          recursive: true,
+          include: /\.js$/,
+        },
+      ],
+    }),
+  ],
 };
