@@ -8,17 +8,17 @@ const logger = require('../lib/logger');
 const fileHelpers = require('../lib/file-helpers');
 const injectRSCPayload = require('../lib/inject-rsc-payload');
 const teeStream = require('../lib/tee-stream');
-const { DIST_DIR } = require('../lib/constants');
+const { BUILD_DIR } = require('../lib/constants');
 
 register('./framework/loaders/ssr.js', url.pathToFileURL('./'));
 const PORT = 8000;
 
 async function serveJavaScript(res, pathname) {
   try {
-    const filePath = path.join(DIST_DIR, pathname);
+    const filePath = path.join(BUILD_DIR, pathname);
     const content = await fileHelpers.readFile(filePath);
     res.writeHead(200, {
-      'Content-Type': 'application/javascript',
+      'Content-Type': 'app/javascript',
     });
     res.end(content);
     logger.info(`Served JS file: ${pathname}`);
@@ -61,7 +61,7 @@ const server = http.createServer(async (req, res) => {
         if (isRSC) {
           rscRes.pipe(res);
         } else {
-          const manifestPath = path.join(DIST_DIR, 'react-ssr-manifest.json');
+          const manifestPath = path.join(BUILD_DIR, 'react-ssr-manifest.json');
           const serverConsumerManifest = await fileHelpers.readJsonFile(
             manifestPath
           );

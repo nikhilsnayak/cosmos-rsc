@@ -5,7 +5,7 @@ const util = require('util');
 
 const config = require('../config/webpack.config');
 
-fs.rmSync(path.resolve(__dirname, '../../dist'), {
+fs.rmSync(path.resolve(__dirname, '../../.cosmos-rsc'), {
   recursive: true,
   force: true,
 });

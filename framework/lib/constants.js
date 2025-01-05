@@ -1,5 +1,5 @@
 const path = require('path');
 
-const DIST_DIR = path.resolve(__dirname, '../../dist');
+const BUILD_DIR = path.resolve(__dirname, '../../.cosmos-rsc');
 
-module.exports = { DIST_DIR };
+module.exports = { BUILD_DIR };

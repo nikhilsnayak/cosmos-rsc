@@ -1,6 +1,6 @@
 require('react-server-dom-webpack/node-register')();
 require('@babel/register')({
-  ignore: [/[\\\/](dist|node_modules)[\\\/]/],
+  ignore: [/[\\\/](.cosmos-rsc|node_modules)[\\\/]/],
   presets: [['@babel/preset-react', { runtime: 'automatic' }]],
   plugins: ['@babel/transform-modules-commonjs'],
 });
@@ -20,7 +20,7 @@ const { Readable } = require('stream');
 
 const logger = require('../lib/logger');
 const fileHelpers = require('../lib/file-helpers');
-const { DIST_DIR } = require('../lib/constants');
+const { BUILD_DIR } = require('../lib/constants');
 
 const PORT = 8008;
 
@@ -31,10 +31,10 @@ async function serveRSC(
   serverFunctionResult,
   formState
 ) {
-  const manifestPath = path.join(DIST_DIR, 'react-client-manifest.json');
+  const manifestPath = path.join(BUILD_DIR, 'react-client-manifest.json');
   const moduleMap = await fileHelpers.readJsonFile(manifestPath);
 
-  const pagePath = `../../src/pages${pathname}`;
+  const pagePath = `../../app/pages${pathname}`;
   let Page;
 
   try {
@@ -48,7 +48,7 @@ async function serveRSC(
     throw new Error(`No default export found in ${pagePath}`);
   }
 
-  const RootLayout = require('../../src/root-layout').default;
+  const RootLayout = require('../../app/root-layout').default;
 
   const Component = React.createElement(
     RootLayout,

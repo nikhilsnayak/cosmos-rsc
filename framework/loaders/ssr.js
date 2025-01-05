@@ -5,7 +5,7 @@ export async function load(url, context, defaultLoad) {
   if (result.format === 'module') {
     const newResult = await babel.transformAsync(result.source, {
       filename: url,
-      ignore: [/\/(dist|node_modules)\//],
+      ignore: [/\/(.cosmos-rsc|node_modules)\//],
       presets: [['@babel/preset-react', { runtime: 'automatic' }]],
     });
     if (!newResult) {

@@ -7,7 +7,7 @@ module.exports = {
   mode: isProduction ? 'production' : 'development',
   entry: [path.resolve(__dirname, '../client/index.js')],
   output: {
-    path: path.resolve(__dirname, '../../dist'),
+    path: path.resolve(__dirname, '../../.cosmos-rsc'),
     filename: 'client.js',
   },
   module: {
@@ -36,7 +36,7 @@ module.exports = {
       isServer: false,
       clientReferences: [
         {
-          directory: './src',
+          directory: './app',
           recursive: true,
           include: /\.js$/,
         },
