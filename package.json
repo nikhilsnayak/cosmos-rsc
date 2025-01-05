@@ -2,9 +2,9 @@
   "name": "cosmos-rsc",
   "version": "0.1.0",
   "scripts": {
-    "build": "node --env-file=.env framework/scripts/build.js",
-    "rsc-server": "node --env-file=.env --conditions=react-server framework/server/rsc.js",
-    "ssr-server": "node --env-file=.env framework/server/ssr.js",
+    "build": "node framework/scripts/build.js",
+    "rsc-server": "node --conditions=react-server framework/server/rsc.js",
+    "ssr-server": "node framework/server/ssr.js",
     "start": " npm run build && concurrently \"npm run rsc-server\" \"npm run ssr-server\""
   },
   "dependencies": {
