@@ -5,7 +5,11 @@ module.exports = function () {
 
   return {
     get: function (name) {
-      return cookies.get(name)?.value;
+      return (
+        cookies.incoming.get(name)?.value ??
+        cookies.outgoing.get(name)?.value ??
+        null
+      );
     },
     set: function (name, value, options) {
       const cookie = {
@@ -13,7 +17,8 @@ module.exports = function () {
         ...options,
       };
 
-      cookies.set(name, cookie);
+      cookies.outgoing.set(name, cookie);
+      cookies.incoming.delete(name);
     },
     remove: function (name) {
       cookies.delete(name);

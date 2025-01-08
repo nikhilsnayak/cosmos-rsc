@@ -25,13 +25,51 @@ const { runWithAppStore, getAppStore } = require('../lib/app-store');
 
 const PORT = 8008;
 
-async function serveRSC(
+function getCookieString(cookiesEntries) {
+  return cookiesEntries
+    .map(([key, cookie]) => {
+      const { value, ...options } = cookie;
+      const optionsString = Object.entries(options)
+        .map(([optionKey, optionValue]) => {
+          if (optionKey === 'httpOnly') {
+            return optionValue ? 'HttpOnly' : '';
+          }
+          if (optionKey === 'secure') {
+            return optionValue ? 'Secure' : '';
+          }
+          if (optionKey === 'expires' && optionValue instanceof Date) {
+            return `Expires=${optionValue.toUTCString()}`;
+          }
+          if (optionKey === 'maxAge') {
+            return `Max-Age=${optionValue}`;
+          }
+          if (optionKey === 'domain') {
+            return `Domain=${optionValue}`;
+          }
+          if (optionKey === 'path') {
+            return `Path=${optionValue}`;
+          }
+          if (optionKey === 'sameSite') {
+            return `SameSite=${optionValue}`;
+          }
+          return '';
+        })
+        .filter(Boolean)
+        .join('; ');
+
+      return `${key}=${value}${optionsString ? `; ${optionsString}` : ''}`;
+    })
+    .join('; ');
+}
+
+async function serveRSC({
   res,
   pathname,
   searchParams,
   serverFunctionResult,
-  formState
-) {
+  formState,
+}) {
+  const { cookies } = getAppStore();
   const manifestPath = path.join(BUILD_DIR, 'react-client-manifest.json');
   const moduleMap = await fileHelpers.readJsonFile(manifestPath);
 
@@ -63,48 +101,13 @@ async function serveRSC(
     moduleMap
   );
 
-  const { cookies, incomingCookieString } = getAppStore();
-
-  const cookieStrings = Array.from(cookies).map(([key, cookie]) => {
-    const { value, ...options } = cookie;
-
-    const optionsString = Object.entries(options)
-      .map(([optionKey, optionValue]) => {
-        if (optionKey === 'httpOnly') {
-          return optionValue ? 'HttpOnly' : '';
-        }
-        if (optionKey === 'secure') {
-          return optionValue ? 'Secure' : '';
-        }
-        if (optionKey === 'expires' && optionValue instanceof Date) {
-          return `Expires=${optionValue.toUTCString()}`;
-        }
-        if (optionKey === 'maxAge') {
-          return `Max-Age=${optionValue}`;
-        }
-        if (optionKey === 'domain') {
-          return `Domain=${optionValue}`;
-        }
-        if (optionKey === 'path') {
-          return `Path=${optionValue}`;
-        }
-        if (optionKey === 'sameSite') {
-          return `SameSite=${optionValue}`;
-        }
-        return '';
-      })
-      .filter(Boolean)
-      .join('; ');
-
-    return `${key}=${value}${optionsString ? `; ${optionsString}` : ''}`;
-  });
-
-  const cookieString = cookieStrings.join('; ');
-
   res.writeHead(200, {
     'Content-Type': 'text/x-component',
-    ...(cookieString !== incomingCookieString && {
-      'Set-Cookie': cookieString,
+    ...(cookies.outgoing.size > 0 && {
+      'Set-Cookie': getCookieString([
+        ...Array.from(cookies.incoming),
+        ...Array.from(cookies.outgoing),
+      ]),
     }),
   });
 
@@ -113,12 +116,12 @@ async function serveRSC(
 }
 
 const server = http.createServer(async (req, res) => {
-  const parsedUrl = url.parse(req.url, true);
-  const searchParams = { ...parsedUrl.query };
+  const { pathname, query } = url.parse(req.url, true);
+  const searchParams = { ...query };
 
-  logger.info(`${req.method} ${parsedUrl.pathname}`, '(RSC)');
+  logger.info(`${req.method} ${pathname}`, '(RSC)');
 
-  const cookies = new Map(
+  const incomingCookies = new Map(
     req.headers.cookie?.split(';').map((cookie) => {
       const [key, ...valueParts] = cookie.split('=');
       return [
@@ -131,14 +134,16 @@ const server = http.createServer(async (req, res) => {
   );
 
   const appStore = {
-    cookies,
-    incomingCookieString: req.headers.cookie,
+    cookies: {
+      incoming: incomingCookies,
+      outgoing: new Map(),
+    },
   };
 
   runWithAppStore(appStore, async () => {
     try {
       if (req.method === 'GET') {
-        await serveRSC(res, parsedUrl.pathname, searchParams);
+        await serveRSC({ res, pathname, searchParams });
       } else if (req.method === 'POST') {
         const serverFunctionId = req.headers['server-function-id'];
 
@@ -167,16 +172,16 @@ const server = http.createServer(async (req, res) => {
           formState = decodeFormState(result, formData);
         }
 
-        await serveRSC(
+        await serveRSC({
           res,
-          parsedUrl.pathname,
+          pathname,
           searchParams,
           serverFunctionResult,
-          formState
-        );
+          formState,
+        });
       }
     } catch (error) {
-      logger.error(`Failed to render RSC for ${parsedUrl.pathname}`, error);
+      logger.error(`Failed to render RSC for ${pathname}`, error);
       res.writeHead(500);
       res.end('Internal Server Error');
     }

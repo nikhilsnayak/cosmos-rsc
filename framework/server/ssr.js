@@ -50,6 +50,11 @@ const server = http.createServer(async (req, res) => {
       };
 
       const rscReq = http.request(options, async (rscRes) => {
+        if (rscRes.statusCode !== 200) {
+          res.writeHead(rscRes.statusCode, rscRes.headers);
+          return rscRes.pipe(res);
+        }
+
         const isRSC = req.headers.accept === 'text/x-component';
 
         rscRes.headers['content-type'] = isRSC
