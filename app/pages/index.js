@@ -6,6 +6,7 @@ import cookies from '../../framework/lib/cookies';
 export default function Page() {
   const jar = cookies();
   console.log(jar.get('message'));
+  jar.set('error-test', 'This is an error test', { httpOnly: true });
   return (
     <div>
       <h1>COSMOS RSC</h1>

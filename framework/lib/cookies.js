@@ -1,7 +1,8 @@
 const { getAppStore } = require('./app-store');
+const logger = require('./logger');
 
 module.exports = function () {
-  const { cookies } = getAppStore();
+  const { cookies, metadata } = getAppStore();
 
   return {
     get: function (name) {
@@ -12,6 +13,12 @@ module.exports = function () {
       );
     },
     set: function (name, value, options) {
+      if (metadata.isRSCRenderStarted) {
+        logger.error(
+          `Cannot set cookie "${name}" after the response has been sent to the client`
+        );
+        return;
+      }
       const cookie = {
         value,
         ...options,

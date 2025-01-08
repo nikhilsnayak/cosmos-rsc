@@ -69,7 +69,7 @@ async function serveRSC({
   serverFunctionResult,
   formState,
 }) {
-  const { cookies } = getAppStore();
+  const { cookies, metadata } = getAppStore();
   const manifestPath = path.join(BUILD_DIR, 'react-client-manifest.json');
   const moduleMap = await fileHelpers.readJsonFile(manifestPath);
 
@@ -95,6 +95,8 @@ async function serveRSC({
     null,
     React.createElement(Page, { searchParams })
   );
+
+  metadata.isRSCRenderStarted = true;
 
   const { pipe } = renderToPipeableStream(
     { rscPayload: Component, serverFunctionResult, formState },
@@ -134,6 +136,9 @@ const server = http.createServer(async (req, res) => {
   );
 
   const appStore = {
+    metadata: {
+      isRSCRenderStarted: false,
+    },
     cookies: {
       incoming: incomingCookies,
       outgoing: new Map(),
