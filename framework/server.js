@@ -52,7 +52,7 @@ function renderRSC(req, cb) {
 
 async function requestHandler(req, res) {
   try {
-    if (req.headers.accept === 'text/x-component') {
+    if (req.accepts('text/x-component')) {
       res.setHeader('Content-Type', 'text/x-component');
 
       renderRSC(req, (message) => {
