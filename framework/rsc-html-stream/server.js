@@ -106,4 +106,4 @@ function escapeScript(script) {
   return script.replace(/<!--/g, '<\\!--').replace(/<\/(script)/gi, '</\\$1');
 }
 
-module.exports = injectRSCPayload;
+module.exports = { injectRSCPayload };

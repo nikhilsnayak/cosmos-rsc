@@ -4,7 +4,7 @@ export const RouterContext = createContext(null);
 
 export function useRouter() {
   const context = use(RouterContext);
-  if (typeof window !== 'undefined' && context === null) {
+  if (context === null) {
     throw new Error('Router was not mounted');
   }
   return context;
