@@ -19,10 +19,15 @@ export const rscStream = new ReadableStream({
   },
 });
 
+const closeController = () => {
+  if (streamController) {
+    streamController.close();
+    streamController = null;
+  }
+};
+
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    streamController?.close();
-  });
+  document.addEventListener('DOMContentLoaded', closeController, { once: true });
 } else {
-  streamController?.close();
+  closeController();
 }
