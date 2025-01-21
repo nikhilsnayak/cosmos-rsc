@@ -3,9 +3,8 @@
   "version": "0.1.0",
   "scripts": {
     "build": "node framework/scripts/build.js",
-    "rsc-server": "node --conditions=react-server framework/server/rsc.js",
-    "ssr-server": "node framework/server/ssr.js",
-    "start": " npm run build && concurrently \"npm run rsc-server\" \"npm run ssr-server\""
+    "server": "node framework/server.js",
+    "start": "npm run build && npm run server"
   },
   "dependencies": {
     "@babel/core": "^7.26.0",
@@ -14,7 +13,7 @@
     "@babel/register": "^7.25.9",
     "babel-loader": "^9.2.1",
     "busboy": "^1.6.0",
-    "concurrently": "^9.1.0",
+    "express": "^4.21.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-server-dom-webpack": "^19.0.0",
