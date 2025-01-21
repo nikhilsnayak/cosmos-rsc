@@ -4,6 +4,7 @@ import { ErrorBoundary } from './error-boundary';
 import { rscStream } from '../rsc-html-stream/client';
 import { SPARouter } from './spa-router';
 import { callServer } from './call-server';
+import { getFullPath } from './utils';
 
 async function hydrateDocument() {
   const { tree } = await createFromReadableStream(rscStream, {
@@ -12,7 +13,7 @@ async function hydrateDocument() {
 
   const initialState = {
     tree,
-    cache: new Map([[window.location.href, tree]]),
+    cache: new Map([[getFullPath(window.location.href), tree]]),
   };
 
   hydrateRoot(

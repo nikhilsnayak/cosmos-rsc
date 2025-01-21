@@ -1,4 +1,5 @@
 import { getRSCPayload } from './get-rsc-payload';
+import { getFullPath } from './utils';
 
 export async function routerReducer(prevState, action) {
   switch (action.type) {
@@ -6,7 +7,7 @@ export async function routerReducer(prevState, action) {
       const { tree } = action.payload;
 
       const cache = new Map(prevState.cache);
-      cache.set(window.location.href, action.payload);
+      cache.set(getFullPath(window.location.href), tree);
 
       return { tree, cache };
     }
