@@ -1,6 +1,7 @@
 import { useActionState, useEffect, startTransition, useCallback } from 'react';
 import { RouterContext } from './router';
 import { routerReducer } from './router-reducer';
+import { getFullPath } from './utils';
 
 export function SPARouter({ initialState }) {
   const [routerState, dispatch, isTransitioning] = useActionState(
@@ -21,7 +22,10 @@ export function SPARouter({ initialState }) {
 
     const handlePopState = () => {
       startTransition(() => {
-        dispatch({ type: 'NAVIGATE', payload: { url: window.location.href } });
+        dispatch({
+          type: 'NAVIGATE',
+          payload: { url: getFullPath(window.location.href) },
+        });
       });
     };
 
@@ -37,7 +41,7 @@ export function SPARouter({ initialState }) {
 
   const push = useCallback((url) => {
     startTransition(() => {
-      dispatch({ type: 'PUSH', payload: { url } });
+      dispatch({ type: 'PUSH', payload: { url: getFullPath(url) } });
     });
   }, []);
 

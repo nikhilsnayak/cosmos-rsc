@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "scripts": {
     "build": "node framework/scripts/build.js",
-    "server": "node framework/server.js",
+    "server": "node --conditions react-server framework/server.js",
     "start": "npm run build && npm run server"
   },
   "dependencies": {
