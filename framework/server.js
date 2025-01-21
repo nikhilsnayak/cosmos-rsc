@@ -99,6 +99,10 @@ async function requestHandler(req, res) {
               .pipe(injectRSCPayload(payloadConsumerRSCStream))
               .pipe(res);
           },
+          onError: (error) => {
+            console.error('Render error:', error);
+            res.status(500).send('Internal Server Error');
+          },
         }
       );
     }
