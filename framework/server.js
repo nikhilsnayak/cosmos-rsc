@@ -24,6 +24,16 @@ app.use(express.static(BUILD_DIR));
 function renderRSC(req, cb) {
   const { port1, port2 } = new MessageChannel();
 
+  port1.on('error', (error) => {
+    console.error('Port1 error:', error);
+    // Handle port error if necessary
+  });
+
+  flightWorker.on('error', (error) => {
+    console.error('Flight worker error:', error);
+    // Handle worker error, possibly terminate the response
+  });
+
   const request = {
     port: port2,
     searchParams: req.query,
