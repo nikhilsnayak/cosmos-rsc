@@ -1,121 +1,155 @@
-const express = require('express');
-const { pathToFileURL } = require('url');
-const { register } = require('module');
-const { PassThrough } = require('stream');
-const { Worker, MessageChannel } = require('worker_threads');
-const { createElement } = require('react');
-const { renderToPipeableStream } = require('react-dom/server');
-const { createFromNodeStream } = require('react-server-dom-webpack/client');
-const { injectRSCPayload } = require('./rsc-html-stream/server');
-const { BUILD_DIR, FLIGHT_WORKER_PATH } = require('./lib/constants');
-const { getReactSSRManifest } = require('./lib/manifests');
+require('react-server-dom-webpack/node-register')();
+require('@babel/register')({
+  ignore: [/[\\\/](dist|node_modules)[\\\/]/],
+  presets: [['@babel/preset-react', { runtime: 'automatic' }]],
+  plugins: ['@babel/plugin-transform-modules-commonjs'],
+});
 
-register('./framework/loaders/jsx.js', pathToFileURL('./'));
+const express = require('express');
+const busboy = require('busboy');
+const { createElement } = require('react');
+const { fileURLToPath } = require('url');
+const { MessageChannel, Worker } = require('worker_threads');
+const {
+  renderToPipeableStream,
+  decodeReplyFromBusboy,
+} = require('react-server-dom-webpack/server.node');
+const { getReactClientManifest } = require('./lib/manifests');
+const { runWithAppStore, getAppStore } = require('./lib/app-store');
+const { getCookieString } = require('./lib/utils');
+const { BUILD_DIR, FIZZ_WORKER_PATH } = require('./lib/constants');
+const logger = require('./lib/logger');
+const { Readable, PassThrough } = require('stream');
+
+const RootLayout = require('../app/root-layout').default;
 
 const PORT = 8000;
 const app = express();
 
-const flightWorker = new Worker(FLIGHT_WORKER_PATH, {
-  execArgv: ['--conditions', 'react-server'],
+const fizzWorker = new Worker(FIZZ_WORKER_PATH, {
+  execArgv: ['--conditions', 'default'],
 });
 
 app.use(express.static(BUILD_DIR));
 
-function renderRSC(req, cb) {
-  const { port1, port2 } = new MessageChannel();
-
-  port1.on('error', (error) => {
-    console.error('Port1 error:', error);
-    // Handle port error if necessary
-  });
-
-  flightWorker.on('error', (error) => {
-    console.error('Flight worker error:', error);
-    // Handle worker error, possibly terminate the response
-  });
-
-  const request = {
-    port: port2,
-    searchParams: req.query,
-    pathname: req.path,
-    headers: req.headers,
-    method: req.method,
-  };
-
-  flightWorker.postMessage(request, [port2]);
-  port1.on('message', cb);
-
-  if (req.method === 'POST') {
-    req.on('data', (data) => {
-      port1.postMessage({
-        type: 'data',
-        data,
-      });
-    });
-    req.on('end', () => {
-      port1.postMessage({
-        type: 'end',
-      });
-    });
-  }
-}
-
 async function requestHandler(req, res) {
   try {
-    if (req.headers.accept === 'text/x-component') {
-      res.setHeader('Content-Type', 'text/x-component');
+    const incomingCookies = new Map(
+      req.headers.cookie?.split(';').map((cookie) => {
+        const [key, ...valueParts] = cookie.split('=');
+        return [
+          key.trim(),
+          {
+            value: valueParts.join('=').trim(),
+          },
+        ];
+      }) ?? []
+    );
 
-      renderRSC(req, (message) => {
-        if (message.type === 'cookies') {
-          res.setHeader('Set-Cookie', message.data);
-        } else if (message.type === 'data') {
-          res.write(message.data);
-        } else if (message.type === 'end') {
-          res.end();
+    const appStore = {
+      metadata: {
+        isRSCRenderStarted: false,
+      },
+      cookies: {
+        incoming: incomingCookies,
+        outgoing: new Map(),
+      },
+    };
+
+    runWithAppStore(appStore, async () => {
+      let serverFunctionResult;
+      if (req.method === 'POST') {
+        const bb = busboy({ headers: req.headers });
+        req.pipe(bb);
+
+        const serverFunctionId = req.headers['server-function-id'];
+        if (serverFunctionId) {
+          const [fileUrl, functionName] = serverFunctionId.split('#');
+          const serverFunction = require(fileURLToPath(fileUrl))[functionName];
+          const args = await decodeReplyFromBusboy(bb);
+          serverFunctionResult = await serverFunction.apply(null, args);
         }
-      });
-    } else {
-      const htmlConsumerRSCStream = new PassThrough();
-      const payloadConsumerRSCStream = new PassThrough();
+      }
 
-      renderRSC(req, (message) => {
-        if (message.type === 'cookies') {
-          res.setHeader('Set-Cookie', message.data);
-        } else if (message.type === 'data') {
-          htmlConsumerRSCStream.write(message.data);
-          payloadConsumerRSCStream.write(message.data);
-        } else if (message.type === 'end') {
-          htmlConsumerRSCStream.end();
-          payloadConsumerRSCStream.end();
-        }
-      });
+      const { cookies, metadata } = getAppStore();
 
-      const serverConsumerManifest = await getReactSSRManifest();
+      metadata.isRSCRenderStarted = true;
 
-      const { tree } = await createFromNodeStream(
-        htmlConsumerRSCStream,
-        serverConsumerManifest
+      if (cookies.outgoing.size > 0) {
+        const cookieString = getCookieString([
+          ...Array.from(cookies.incoming),
+          ...Array.from(cookies.outgoing),
+        ]);
+        res.setHeader('Set-Cookie', cookieString);
+      }
+
+      const pagePath = `../app/pages${req.path}`;
+      let Page;
+
+      try {
+        Page = require(pagePath).default;
+      } catch (error) {
+        logger.error(`Failed to import page: ${pagePath}`, error);
+        res.status(500).send('Internal Server Error');
+      }
+
+      if (!Page) {
+        throw new Error(`No default export found in ${pagePath}`);
+      }
+
+      const tree = createElement(
+        RootLayout,
+        null,
+        createElement(Page, { searchParams: req.query })
       );
 
-      res.setHeader('Content-Type', 'text/html');
-      const { SSRRouter } = await import('./client/ssr-router.js');
+      const webpackMap = await getReactClientManifest();
+      const rscStream = renderToPipeableStream({ tree }, webpackMap, {
+        onError: (error) => {
+          console.error('Render error:', error);
+          res.status(500).send('Internal Server Error');
+        },
+      });
 
-      const htmlStream = renderToPipeableStream(
-        createElement(SSRRouter, { initialState: { tree } }),
-        {
-          bootstrapScripts: ['/client.js'],
-          onShellReady: () => {
-            htmlStream
-              .pipe(injectRSCPayload(payloadConsumerRSCStream))
-              .pipe(res);
-          },
-          onError: (error) => {
-            console.error('Render error:', error);
-            res.status(500).send('Internal Server Error');
-          },
-        }
-      );
-    }
+      if (req.headers.accept === 'text/x-component') {
+        res.setHeader('Content-Type', 'text/x-component');
+        rscStream.pipe(res);
+      } else {
+        res.setHeader('Content-Type', 'text/html');
+
+        const passThroughRSCStream = new PassThrough();
+        rscStream.pipe(passThroughRSCStream);
+
+        const { port1, port2 } = new MessageChannel();
+
+        const request = {
+          port: port2,
+        };
+
+        fizzWorker.postMessage(request, [port2]);
+
+        passThroughRSCStream.on('data', (data) => {
+          port1.postMessage({
+            type: 'data',
+            data,
+          });
+        });
+
+        passThroughRSCStream.on('end', () => {
+          port1.postMessage({
+            type: 'end',
+          });
+        });
+
+        port1.on('message', (message) => {
+          if (message.type === 'data') {
+            res.write(message.data);
+          } else if (message.type === 'end') {
+            res.end();
+          }
+        });
+      }
+    });
   } catch (error) {
     console.log({ error });
     res.status(500).send('Internal Server Error');

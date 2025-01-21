@@ -1,12 +1,12 @@
 import { RouterContext } from './router.js';
 
 export function SSRRouter({ initialState }) {
-  const replace = () => {
-    throw new Error('Cannot call replace during SSR');
+  const push = () => {
+    throw new Error('Cannot call `router.push` during SSR');
   };
 
   return (
-    <RouterContext value={{ replace, isTransitioning: false }}>
+    <RouterContext value={{ push, isTransitioning: false }}>
       {initialState.tree}
     </RouterContext>
   );
