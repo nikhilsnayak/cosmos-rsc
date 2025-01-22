@@ -1,6 +1,6 @@
 'use server';
 
-import cookies from '../../framework/lib/cookies';
+import cookies from '#cookies';
 
 export async function logOnServer(formData) {
   const jar = cookies();

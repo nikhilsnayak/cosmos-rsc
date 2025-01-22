@@ -1,6 +1,11 @@
 {
   "name": "cosmos-rsc",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "imports": {
+    "#cookies": "./framework/lib/cookies.js",
+    "#router": "./framework/client/router.js",
+    "#link": "./framework/client/link.js"
+  },
   "scripts": {
     "build": "node framework/scripts/build.js",
     "server": "node --conditions react-server framework/server.js",

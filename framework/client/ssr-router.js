@@ -1,4 +1,4 @@
-import { RouterContext } from './router.js';
+import { RouterContext } from '#router';
 
 export function SSRRouter({ initialState }) {
   const push = () => {

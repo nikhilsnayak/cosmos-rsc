@@ -1,11 +1,10 @@
-const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
 const util = require('util');
-
 const config = require('../config/webpack.config');
+const { BUILD_DIR } = require('../lib/constants');
 
-fs.rmSync(path.resolve(__dirname, '../../.cosmos-rsc'), {
+fs.rmSync(BUILD_DIR, {
   recursive: true,
   force: true,
 });

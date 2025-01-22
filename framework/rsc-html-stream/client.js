@@ -1,3 +1,5 @@
+// https://github.com/devongovett/rsc-html-stream/blob/main/client.js
+
 let streamController;
 const encoder = new TextEncoder();
 
@@ -27,7 +29,9 @@ const closeController = () => {
 };
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', closeController, { once: true });
+  document.addEventListener('DOMContentLoaded', closeController, {
+    once: true,
+  });
 } else {
   closeController();
 }

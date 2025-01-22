@@ -1,3 +1,5 @@
+// https://github.com/devongovett/rsc-html-stream/blob/main/server.js
+
 const { Transform } = require('stream');
 const { TextEncoder, TextDecoder } = require('util');
 

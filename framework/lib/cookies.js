@@ -13,7 +13,7 @@ module.exports = function () {
       );
     },
     set: function (name, value, options) {
-      if (metadata.isRSCRenderStarted) {
+      if (metadata.renderPhase === 'RSC') {
         logger.error(
           `Cannot set cookie "${name}" after the response has been sent to the client`
         );
@@ -28,7 +28,8 @@ module.exports = function () {
       cookies.incoming.delete(name);
     },
     remove: function (name) {
-      cookies.delete(name);
+      cookies.outgoing.delete(name);
+      cookies.incoming.delete(name);
     },
   };
 };
