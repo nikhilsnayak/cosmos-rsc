@@ -1,7 +1,7 @@
+import Link from '#link';
+import cookies from '#cookies';
 import { Counter } from '../components/counter';
-import Link from '../../framework/client/link';
 import { logOnServer } from '../functions/log-on-server';
-import cookies from '../../framework/lib/cookies';
 
 export default function Page() {
   const jar = cookies();

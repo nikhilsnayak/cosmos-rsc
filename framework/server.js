@@ -18,8 +18,8 @@ const { getReactClientManifest } = require('./lib/manifests');
 const { runWithAppStore, getAppStore } = require('./lib/app-store');
 const { getCookieString } = require('./lib/utils');
 const { BUILD_DIR, FIZZ_WORKER_PATH } = require('./lib/constants');
+const { PassThrough } = require('stream');
 const logger = require('./lib/logger');
-const { Readable, PassThrough } = require('stream');
 
 const RootLayout = require('../app/root-layout').default;
 
@@ -48,7 +48,7 @@ async function requestHandler(req, res) {
 
     const appStore = {
       metadata: {
-        isRSCRenderStarted: false,
+        renderPhase: 'START',
       },
       cookies: {
         incoming: incomingCookies,
@@ -57,8 +57,12 @@ async function requestHandler(req, res) {
     };
 
     runWithAppStore(appStore, async () => {
+      const { cookies, metadata } = getAppStore();
+
       let serverFunctionResult;
       if (req.method === 'POST') {
+        metadata.renderPhase = 'SERVER_FUNCTION';
+
         const bb = busboy({ headers: req.headers });
         req.pipe(bb);
 
@@ -71,9 +75,7 @@ async function requestHandler(req, res) {
         }
       }
 
-      const { cookies, metadata } = getAppStore();
-
-      metadata.isRSCRenderStarted = true;
+      metadata.renderPhase = 'RSC';
 
       if (cookies.outgoing.size > 0) {
         const cookieString = getCookieString([
@@ -104,54 +106,59 @@ async function requestHandler(req, res) {
       );
 
       const webpackMap = await getReactClientManifest();
-      const rscStream = renderToPipeableStream({ tree }, webpackMap, {
-        onError: (error) => {
-          console.error('Render error:', error);
-          res.status(500).send('Internal Server Error');
-        },
-      });
+      const rscStream = renderToPipeableStream(
+        { tree, serverFunctionResult },
+        webpackMap,
+        {
+          onError: (error) => {
+            console.error('Render error:', error);
+            res.status(500).send('Internal Server Error');
+          },
+        }
+      );
 
       if (req.headers.accept === 'text/x-component') {
         res.setHeader('Content-Type', 'text/x-component');
         rscStream.pipe(res);
-      } else {
-        res.setHeader('Content-Type', 'text/html');
-
-        const passThroughRSCStream = new PassThrough();
-        rscStream.pipe(passThroughRSCStream);
-
-        const { port1, port2 } = new MessageChannel();
-
-        const request = {
-          port: port2,
-        };
-
-        fizzWorker.postMessage(request, [port2]);
-
-        passThroughRSCStream.on('data', (data) => {
-          port1.postMessage({
-            type: 'data',
-            data,
-          });
-        });
-
-        passThroughRSCStream.on('end', () => {
-          port1.postMessage({
-            type: 'end',
-          });
-        });
-
-        port1.on('message', (message) => {
-          if (message.type === 'data') {
-            res.write(message.data);
-          } else if (message.type === 'end') {
-            res.end();
-          }
-        });
+        return;
       }
+
+      res.setHeader('Content-Type', 'text/html');
+
+      const passThroughRSCStream = new PassThrough();
+      rscStream.pipe(passThroughRSCStream);
+
+      const { port1, port2 } = new MessageChannel();
+
+      const request = {
+        port: port2,
+      };
+
+      fizzWorker.postMessage(request, [port2]);
+
+      passThroughRSCStream.on('data', (data) => {
+        port1.postMessage({
+          type: 'data',
+          data,
+        });
+      });
+
+      passThroughRSCStream.on('end', () => {
+        port1.postMessage({
+          type: 'end',
+        });
+      });
+
+      port1.on('message', (message) => {
+        if (message.type === 'data') {
+          res.write(message.data);
+        } else if (message.type === 'end') {
+          res.end();
+        }
+      });
     });
   } catch (error) {
-    console.log({ error });
+    logger.error(error);
     res.status(500).send('Internal Server Error');
   }
 }
@@ -167,5 +174,5 @@ app.get('*', async (req, res) => {
 app.post('*', requestHandler);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  logger.info(`Server is running on http://localhost:${PORT}`);
 });

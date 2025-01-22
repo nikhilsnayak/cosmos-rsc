@@ -1,5 +1,5 @@
 'use client';
-import { useRouter } from './router.js';
+import { useRouter } from '#router';
 
 export default function Link({ href, children, ...rest }) {
   const router = useRouter();
