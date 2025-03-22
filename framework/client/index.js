@@ -7,7 +7,7 @@ import { callServer } from './call-server';
 import { getFullPath } from './utils';
 
 async function hydrateDocument() {
-  const { tree } = await createFromReadableStream(rscStream, {
+  const { tree, formState } = await createFromReadableStream(rscStream, {
     callServer,
   });
 
@@ -20,7 +20,10 @@ async function hydrateDocument() {
     document,
     <ErrorBoundary>
       <SPARouter initialState={initialState} />
-    </ErrorBoundary>
+    </ErrorBoundary>,
+    {
+      formState
+    }
   );
 }
 
