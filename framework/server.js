@@ -10,15 +10,17 @@ const busboy = require('busboy');
 const { createElement } = require('react');
 const { fileURLToPath } = require('url');
 const { MessageChannel, Worker } = require('worker_threads');
+const { PassThrough, Readable } = require('stream');
 const {
   renderToPipeableStream,
   decodeReplyFromBusboy,
-} = require('react-server-dom-webpack/server.node');
+  decodeAction,
+  decodeFormState,
+} = require('react-server-dom-webpack/server');
 const { getReactClientManifest } = require('./lib/manifests');
 const { runWithAppStore, getAppStore } = require('./lib/app-store');
 const { getCookieString } = require('./lib/utils');
 const { BUILD_DIR, FIZZ_WORKER_PATH } = require('./lib/constants');
-const { PassThrough } = require('stream');
 const logger = require('./lib/logger');
 
 const RootLayout = require('../app/root-layout').default;
@@ -60,6 +62,7 @@ async function requestHandler(req, res) {
       const { cookies, metadata } = getAppStore();
 
       let serverFunctionResult;
+      let formState;
       if (req.method === 'POST') {
         metadata.renderPhase = 'SERVER_FUNCTION';
 
@@ -72,6 +75,17 @@ async function requestHandler(req, res) {
           const serverFunction = require(fileURLToPath(fileUrl))[functionName];
           const args = await decodeReplyFromBusboy(bb);
           serverFunctionResult = await serverFunction.apply(null, args);
+        } else {
+          const fakeReq = new Request('http://localhost', {
+            method: 'POST',
+            headers: { 'Content-Type': req.headers['content-type'] },
+            body: Readable.toWeb(req),
+            duplex: 'half',
+          });
+          const formData = await fakeReq.formData();
+          const action = await decodeAction(formData);
+          const result = await action();
+          formState = await decodeFormState(result, formData);
         }
       }
 
@@ -107,7 +121,7 @@ async function requestHandler(req, res) {
 
       const webpackMap = await getReactClientManifest();
       const rscStream = renderToPipeableStream(
-        { tree, serverFunctionResult },
+        { tree, serverFunctionResult, formState },
         webpackMap,
         {
           onError: (error) => {

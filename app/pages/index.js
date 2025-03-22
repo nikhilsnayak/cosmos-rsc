@@ -12,6 +12,7 @@ export default function Page() {
       <h1>COSMOS RSC</h1>
       <Counter />
       <Link href='/streaming'>Streaming page</Link>
+      <Link href='/use-action-state-progressive-enhancement'>useActionState Progressive Enhancement</Link>
       <form action={logOnServer}>
         <input type='text' placeholder='Enter a message...' name='message' />
       </form>
