@@ -1,9 +1,10 @@
 import { useActionState, useEffect, startTransition, useCallback } from 'react';
-import { RouterContext } from '#router';
+import { RouterContext } from '#cosmos-rsc/router';
 import { routerReducer } from './router-reducer';
 import { getFullPath } from './utils';
+import { FlashProvider } from './flash-context';
 
-export function SPARouter({ initialState }) {
+export function SPARouter({ initialState, initialFlashMessages }) {
   const [routerState, dispatch, isTransitioning] = useActionState(
     routerReducer,
     initialState
@@ -18,7 +19,7 @@ export function SPARouter({ initialState }) {
       });
     };
 
-    window.__cosmos_rsc = { updateTree };
+    window.__cosmos_rsc = { ...window.__cosmos_rsc, updateTree };
 
     const handlePopState = () => {
       startTransition(() => {
@@ -35,7 +36,7 @@ export function SPARouter({ initialState }) {
 
     return () => {
       controller.abort();
-      window.__cosmos_rsc = null;
+      delete window.__cosmos_rsc.updateTree;
     };
   }, []);
 
@@ -47,7 +48,9 @@ export function SPARouter({ initialState }) {
 
   return (
     <RouterContext value={{ push, isTransitioning }}>
-      {routerState.tree}
+      <FlashProvider initialState={initialFlashMessages}>
+        {routerState.tree}
+      </FlashProvider>
     </RouterContext>
   );
 }

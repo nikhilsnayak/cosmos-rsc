@@ -56,10 +56,11 @@ async function requestHandler(req, res) {
         incoming: incomingCookies,
         outgoing: new Map(),
       },
+      flashMessages: [],
     };
 
     runWithAppStore(appStore, async () => {
-      const { cookies, metadata } = getAppStore();
+      const { cookies, metadata, flashMessages } = getAppStore();
 
       let serverFunctionResult;
       let formState;
@@ -121,7 +122,7 @@ async function requestHandler(req, res) {
 
       const webpackMap = await getReactClientManifest();
       const rscStream = renderToPipeableStream(
-        { tree, serverFunctionResult, formState },
+        { tree, serverFunctionResult, formState, flashMessages },
         webpackMap,
         {
           onError: (error) => {

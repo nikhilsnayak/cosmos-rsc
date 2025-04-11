@@ -1,4 +1,5 @@
-import { RouterContext } from '#router';
+import { RouterContext } from '#cosmos-rsc/router';
+import { FlashProvider } from './flash-context.js';
 
 export function SSRRouter({ initialState }) {
   const push = () => {
@@ -7,7 +8,9 @@ export function SSRRouter({ initialState }) {
 
   return (
     <RouterContext value={{ push, isTransitioning: false }}>
-      {initialState.tree}
+      <FlashProvider initialState={initialState.flashMessages}>
+        {initialState.tree}
+      </FlashProvider>
     </RouterContext>
   );
 }

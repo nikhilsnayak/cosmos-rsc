@@ -7,9 +7,12 @@ import { callServer } from './call-server';
 import { getFullPath } from './utils';
 
 async function hydrateDocument() {
-  const { tree, formState } = await createFromReadableStream(rscStream, {
-    callServer,
-  });
+  const { tree, formState, flashMessages } = await createFromReadableStream(
+    rscStream,
+    {
+      callServer,
+    }
+  );
 
   const initialState = {
     tree,
@@ -19,10 +22,13 @@ async function hydrateDocument() {
   hydrateRoot(
     document,
     <ErrorBoundary>
-      <SPARouter initialState={initialState} />
+      <SPARouter
+        initialState={initialState}
+        initialFlashMessages={flashMessages}
+      />
     </ErrorBoundary>,
     {
-      formState
+      formState,
     }
   );
 }

@@ -1,5 +1,5 @@
-import Link from '#link';
-import cookies from '#cookies';
+import Link from '#cosmos-rsc/link';
+import { cookies } from '#cosmos-rsc/server';
 import { Counter } from '../components/counter';
 import { logOnServer } from '../functions/log-on-server';
 
@@ -13,7 +13,13 @@ export default function Page() {
       <Counter />
       <Link href='/streaming'>Streaming page</Link>
       <br />
-      <Link href='/use-action-state-progressive-enhancement'>useActionState Progressive Enhancement</Link>
+      <Link href='/use-action-state-progressive-enhancement'>
+        useActionState Progressive Enhancement
+      </Link>
+      <br />
+      <Link href='/flash-messages'>
+        Flash Messages
+      </Link>
       <form action={logOnServer}>
         <input type='text' placeholder='Enter a message...' name='message' />
       </form>

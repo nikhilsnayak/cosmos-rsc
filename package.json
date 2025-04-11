@@ -2,9 +2,10 @@
   "name": "cosmos-rsc",
   "version": "1.0.0",
   "imports": {
-    "#cookies": "./framework/lib/cookies.js",
-    "#router": "./framework/client/router.js",
-    "#link": "./framework/client/link.js"
+    "#cosmos-rsc/server": "./framework/lib/exports.js",
+    "#cosmos-rsc/router": "./framework/client/router.js",
+    "#cosmos-rsc/link": "./framework/client/link.js",
+    "#cosmos-rsc/client": "./framework/client/exports.js" 
   },
   "scripts": {
     "build": "node framework/scripts/build.js",
