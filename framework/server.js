@@ -178,7 +178,7 @@ async function requestHandler(req, res) {
   }
 }
 
-app.get('*', async (req, res) => {
+app.get('*splat', async (req, res) => {
   if (req.path === '/favicon.ico') {
     res.status(404).end();
     return;
@@ -186,7 +186,7 @@ app.get('*', async (req, res) => {
   await requestHandler(req, res);
 });
 
-app.post('*', requestHandler);
+app.post('*splat', requestHandler);
 
 app.listen(PORT, () => {
   logger.info(`Server is running on http://localhost:${PORT}`);
