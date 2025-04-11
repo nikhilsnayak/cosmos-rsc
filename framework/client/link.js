@@ -1,5 +1,5 @@
 'use client';
-import { useRouter } from '#router';
+import { useRouter } from '#cosmos-rsc/router';
 
 export default function Link({ href, children, ...rest }) {
   const router = useRouter();

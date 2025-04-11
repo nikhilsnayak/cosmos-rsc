@@ -40,7 +40,7 @@ parentPort.on('message', async (request) => {
 
   const serverConsumerManifest = await getReactSSRManifest();
 
-  const { tree, formState } = await createFromNodeStream(
+  const { tree, formState, flashMessages } = await createFromNodeStream(
     htmlConsumerRSCStream,
     serverConsumerManifest
   );
@@ -48,7 +48,7 @@ parentPort.on('message', async (request) => {
   const { SSRRouter } = await import('../client/ssr-router.js');
 
   const htmlStream = renderToPipeableStream(
-    createElement(SSRRouter, { initialState: { tree } }),
+    createElement(SSRRouter, { initialState: { tree, flashMessages } }),
     {
       formState,
       bootstrapScripts: ['/client.js'],

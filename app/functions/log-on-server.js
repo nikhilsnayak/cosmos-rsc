@@ -1,6 +1,6 @@
 'use server';
 
-import cookies from '#cookies';
+import { cookies } from '#cosmos-rsc/server';
 
 export async function logOnServer(formData) {
   const jar = cookies();
