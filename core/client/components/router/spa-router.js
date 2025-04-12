@@ -3,8 +3,9 @@ import { RouterContext } from './index.js';
 import { routerReducer } from '../../lib/router-reducer.js';
 import { getFullPath } from '../../lib/utils.js';
 import { FlashProvider } from '../flash-provider.js';
+import { SlotContext } from '../slot-provider.js';
 
-export function SPARouter({ initialState, initialFlashMessages }) {
+export function SPARouter({ initialState, initialFlashMessages, rootLayout }) {
   const [routerState, dispatch, isTransitioning] = useActionState(
     routerReducer,
     initialState
@@ -49,7 +50,7 @@ export function SPARouter({ initialState, initialFlashMessages }) {
   return (
     <RouterContext value={{ push, isTransitioning }}>
       <FlashProvider initialState={initialFlashMessages}>
-        {routerState.tree}
+        <SlotContext value={routerState.tree}>{rootLayout}</SlotContext>
       </FlashProvider>
     </RouterContext>
   );

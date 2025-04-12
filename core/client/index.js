@@ -8,12 +8,10 @@ import { getFullPath } from './lib/utils';
 import { StrictMode } from 'react';
 
 async function hydrateDocument() {
-  const { tree, formState, flashMessages } = await createFromReadableStream(
-    rscStream,
-    {
+  const { rootLayout, tree, formState, flashMessages } =
+    await createFromReadableStream(rscStream, {
       callServer,
-    }
-  );
+    });
 
   const initialState = {
     tree,
@@ -25,6 +23,7 @@ async function hydrateDocument() {
     <StrictMode>
       <ErrorBoundary>
         <SPARouter
+          rootLayout={rootLayout}
           initialState={initialState}
           initialFlashMessages={flashMessages}
         />
