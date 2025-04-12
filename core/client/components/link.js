@@ -1,7 +1,6 @@
-'use client';
-import { useRouter } from '#cosmos-rsc/router';
+import { useRouter } from './router/index.js';
 
-export default function Link({ href, children, ...rest }) {
+export function Link({ href, children, ...rest }) {
   const router = useRouter();
   const handleClick = (e) => {
     e.preventDefault();

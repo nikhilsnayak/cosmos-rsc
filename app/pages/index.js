@@ -1,4 +1,4 @@
-import Link from '#cosmos-rsc/link';
+import { Link } from '#cosmos-rsc/client';
 import { cookies } from '#cosmos-rsc/server';
 import { Counter } from '../components/counter';
 import { logOnServer } from '../functions/log-on-server';
@@ -17,9 +17,7 @@ export default function Page() {
         useActionState Progressive Enhancement
       </Link>
       <br />
-      <Link href='/flash-messages'>
-        Flash Messages
-      </Link>
+      <Link href='/flash-messages'>Flash Messages</Link>
       <form action={logOnServer}>
         <input type='text' placeholder='Enter a message...' name='message' />
       </form>

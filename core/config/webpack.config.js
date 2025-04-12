@@ -41,7 +41,7 @@ module.exports = {
           include: /\.js$/,
         },
         {
-          directory: './framework/client',
+          directory: './core/client',
           recursive: true,
           include: /\.js$/,
         },

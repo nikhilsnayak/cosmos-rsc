@@ -2,14 +2,12 @@
   "name": "cosmos-rsc",
   "version": "1.0.0",
   "imports": {
-    "#cosmos-rsc/server": "./framework/lib/exports.js",
-    "#cosmos-rsc/router": "./framework/client/router.js",
-    "#cosmos-rsc/link": "./framework/client/link.js",
-    "#cosmos-rsc/client": "./framework/client/exports.js" 
+    "#cosmos-rsc/server": "./core/server/exports.js",
+    "#cosmos-rsc/client": "./core/client/exports.js" 
   },
   "scripts": {
-    "build": "node framework/scripts/build.js",
-    "server": "node --conditions react-server framework/server.js",
+    "build": "node core/scripts/build.js",
+    "server": "node --conditions react-server core/server/index.js",
     "start": "npm run build && npm run server"
   },
   "dependencies": {

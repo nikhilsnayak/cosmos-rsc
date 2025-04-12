@@ -1,6 +1,6 @@
 const path = require('path');
 
-const BUILD_DIR = path.resolve(__dirname, '../../.cosmos-rsc');
+const BUILD_DIR = path.resolve(__dirname, '../../../.cosmos-rsc');
 
 const FIZZ_WORKER_PATH = path.resolve(__dirname, './fizz-worker.js');
 

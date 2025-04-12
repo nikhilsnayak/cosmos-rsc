@@ -2,7 +2,7 @@ import {
   createFromReadableStream,
   encodeReply,
 } from 'react-server-dom-webpack/client';
-import { getFullPath } from './utils';
+import { getFullPath } from './utils.js';
 
 export async function callServer(id, args) {
   const headers = new Headers();

@@ -1,5 +1,5 @@
 import { createFromReadableStream } from 'react-server-dom-webpack/client';
-import { callServer } from './call-server';
+import { callServer } from './call-server.js';
 
 export async function getRSCPayload(url) {
   const headers = new Headers();

@@ -1,5 +1,5 @@
-import { RouterContext } from '#cosmos-rsc/router';
-import { FlashProvider } from './flash-context.js';
+import { RouterContext } from './index.js';
+import { FlashProvider } from '../flash-provider.js';
 
 export function SSRRouter({ initialState }) {
   const push = () => {

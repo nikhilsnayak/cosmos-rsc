@@ -18,11 +18,19 @@ function injectRSCPayload(rscStream) {
 
   function flushBufferedChunks(transform) {
     for (let chunk of buffered) {
-      let buf = decoder.decode(chunk);
+      let buf = decoder.decode(chunk, { stream: true });
       if (buf.endsWith(trailer)) {
         buf = buf.slice(0, -trailer.length);
       }
       transform.push(encoder.encode(buf));
+    }
+
+    let remaining = decoder.decode();
+    if (remaining.length) {
+      if (remaining.endsWith(trailer)) {
+        remaining = remaining.slice(0, -trailer.length);
+      }
+      transform.push(encoder.encode(remaining));
     }
 
     buffered.length = 0;

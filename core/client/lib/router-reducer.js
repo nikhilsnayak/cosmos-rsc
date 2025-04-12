@@ -1,5 +1,5 @@
-import { getRSCPayload } from './get-rsc-payload';
-import { getFullPath } from './utils';
+import { getRSCPayload } from './get-rsc-payload.js';
+import { getFullPath } from './utils.js';
 
 export async function routerReducer(prevState, action) {
   switch (action.type) {

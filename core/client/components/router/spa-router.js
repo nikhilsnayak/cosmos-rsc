@@ -1,8 +1,8 @@
 import { useActionState, useEffect, startTransition, useCallback } from 'react';
-import { RouterContext } from '#cosmos-rsc/router';
-import { routerReducer } from './router-reducer';
-import { getFullPath } from './utils';
-import { FlashProvider } from './flash-context';
+import { RouterContext } from './index.js';
+import { routerReducer } from '../../lib/router-reducer.js';
+import { getFullPath } from '../../lib/utils.js';
+import { FlashProvider } from '../flash-provider.js';
 
 export function SPARouter({ initialState, initialFlashMessages }) {
   const [routerState, dispatch, isTransitioning] = useActionState(

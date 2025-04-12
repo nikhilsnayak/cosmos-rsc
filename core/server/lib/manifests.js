@@ -11,7 +11,9 @@ const reactClientManifest = lazy(async () => {
     return JSON.parse(content);
   } catch (error) {
     if (error.code === 'ENOENT') {
-      throw new Error(`Client manifest not found at ${REACT_CLIENT_MANIFEST_PATH}`);
+      throw new Error(
+        `Client manifest not found at ${REACT_CLIENT_MANIFEST_PATH}`
+      );
     }
     throw new Error(`Failed to parse client manifest: ${error.message}`);
   }

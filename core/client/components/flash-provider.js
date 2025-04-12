@@ -1,14 +1,4 @@
-'use client';
-
-import {
-  createContext,
-  use,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { createContext, use, useEffect, useState } from 'react';
 
 const FlashContext = createContext(null);
 
@@ -38,7 +28,7 @@ export function FlashProvider({ children, initialState }) {
 
     window.__cosmos_rsc = { ...window.__cosmos_rsc, flash };
 
-    addTimeouts(initialState)
+    addTimeouts(initialState);
 
     return () => {
       delete window.__cosmos_rsc.flash;
@@ -52,7 +42,7 @@ export function FlashProvider({ children, initialState }) {
 export function useFlash() {
   const context = use(FlashContext);
   if (context === null) {
-    throw new Error('FlashMessagesContext was not mounted');
+    throw new Error('FlashContext was not mounted');
   }
   return context;
 }

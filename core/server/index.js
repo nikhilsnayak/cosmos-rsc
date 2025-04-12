@@ -1,6 +1,6 @@
 require('react-server-dom-webpack/node-register')();
 require('@babel/register')({
-  ignore: [/[\\\/](dist|node_modules)[\\\/]/],
+  ignore: [/[\\\/](.cosmos-rsc|node_modules)[\\\/]/],
   presets: [['@babel/preset-react', { runtime: 'automatic' }]],
   plugins: ['@babel/plugin-transform-modules-commonjs'],
 });
@@ -23,7 +23,7 @@ const { getCookieString } = require('./lib/utils');
 const { BUILD_DIR, FIZZ_WORKER_PATH } = require('./lib/constants');
 const logger = require('./lib/logger');
 
-const RootLayout = require('../app/root-layout').default;
+const RootLayout = require('../../app/root-layout').default;
 
 const PORT = 8000;
 const app = express();
@@ -100,7 +100,7 @@ async function requestHandler(req, res) {
         res.setHeader('Set-Cookie', cookieString);
       }
 
-      const pagePath = `../app/pages${req.path}`;
+      const pagePath = `../../app/pages${req.path}`;
       let Page;
 
       try {

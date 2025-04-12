@@ -1,4 +1,3 @@
-import { flash } from '#cosmos-rsc/server';
 import { Toaster } from '../components/toster';
 import { addPost } from '../functions/add-post';
 
