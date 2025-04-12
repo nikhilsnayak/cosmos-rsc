@@ -5,6 +5,7 @@ import { rscStream } from '../rsc-html-stream/client';
 import { SPARouter } from './components/router/spa-router';
 import { callServer } from './lib/call-server';
 import { getFullPath } from './lib/utils';
+import { StrictMode } from 'react';
 
 async function hydrateDocument() {
   const { tree, formState, flashMessages } = await createFromReadableStream(
@@ -21,12 +22,14 @@ async function hydrateDocument() {
 
   hydrateRoot(
     document,
-    <ErrorBoundary>
-      <SPARouter
-        initialState={initialState}
-        initialFlashMessages={flashMessages}
-      />
-    </ErrorBoundary>,
+    <StrictMode>
+      <ErrorBoundary>
+        <SPARouter
+          initialState={initialState}
+          initialFlashMessages={flashMessages}
+        />
+      </ErrorBoundary>
+    </StrictMode>,
     {
       formState,
     }
