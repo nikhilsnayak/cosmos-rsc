@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "imports": {
     "#cosmos-rsc/server": "./core/server/exports.js",
-    "#cosmos-rsc/client": "./core/client/exports.js" 
+    "#cosmos-rsc/client": "./core/client/exports.js"
   },
   "scripts": {
     "build": "node core/scripts/build.js",
@@ -17,10 +17,12 @@
     "@babel/register": "^7.25.9",
     "babel-loader": "^10.0.0",
     "busboy": "^1.6.0",
+    "client-only": "^0.0.1",
     "express": "^5.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-server-dom-webpack": "^19.1.0",
+    "server-only": "^0.0.1",
     "webpack": "^5.99.5"
   }
 }
