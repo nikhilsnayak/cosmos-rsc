@@ -22,6 +22,7 @@ const { runWithAppStore, getAppStore } = require('./lib/app-store');
 const { getCookieString } = require('./lib/utils');
 const { BUILD_DIR, FIZZ_WORKER_PATH } = require('./lib/constants');
 const logger = require('./lib/logger');
+const { Slot } = require('../client/components/slot-provider');
 
 const RootLayout = require('../../app/root-layout').default;
 
@@ -114,15 +115,17 @@ async function requestHandler(req, res) {
         throw new Error(`No default export found in ${pagePath}`);
       }
 
-      const tree = createElement(
-        RootLayout,
-        null,
-        createElement(Page, { searchParams: { ...req.query } })
-      );
+      const tree = createElement(Page, { searchParams: { ...req.query } });
+
+      let rootLayout;
+
+      if (req.headers.accept !== 'text/x-component') {
+        rootLayout = createElement(RootLayout, null, createElement(Slot));
+      }
 
       const webpackMap = await getReactClientManifest();
       const rscStream = renderToPipeableStream(
-        { tree, serverFunctionResult, formState, flashMessages },
+        { tree, serverFunctionResult, formState, flashMessages, rootLayout },
         webpackMap,
         {
           onError: (error) => {

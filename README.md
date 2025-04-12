@@ -41,14 +41,14 @@ NODE_ENV=production npm run build
 
 ```sh
 ├── app/
-│   ├── globals.css     # Global styles
-│   ├── pages/         # Page components
-│   └── root-layout.js # Root layout component
+│   ├── globals.css      # Global styles
+│   ├── pages/           # Page components
+│   └── root-layout.js   # Root layout component (Not re-fetched during client side navigation)
 └── core/
-    ├── client/        # Client-side runtime and components
-    ├── config/        # Build configuration
-    ├── loaders/       # Custom loaders
+    ├── client/          # Client-side runtime and components
+    ├── config/          # Build configuration
+    ├── loaders/         # Custom loaders
     ├── rsc-html-stream/ # RSC HTML streaming implementation
-    ├── scripts/       # Build scripts
-    └── server/        # RSC and SSR servers
+    ├── scripts/         # Build scripts
+    └── server/          # RSC and SSR servers
 ```
