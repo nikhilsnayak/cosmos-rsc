@@ -6,9 +6,10 @@ COSMOS RSC is a React Server Component (RSC) template designed to showcase the f
 
 - React Server Components (RSC) implementation with **webpack** bundler
 - Server-side streaming rendering
-- Client-side navigation with custom router
+- Client-side navigation with suspense enabled router
 - Form handling with server actions
 - Basic file-system based routing using pages directory
+- Pre-configured Tailwind CSS for styling
 
 ## Prerequisites
 
@@ -40,21 +41,14 @@ NODE_ENV=production npm run build
 
 ```sh
 ├── app/
-│   ├── pages/          # Page components
-│   └── root-layout.js  # Root layout component
-└── framework/
-    ├── client/         # Client-side runtime
-    ├── config/         # Build configuration
-    ├── lib/            # Utility functions
-    ├── loaders/        # Custom loaders
-    ├── scripts/        # Build scripts
-    └── server/         # RSC and SSR servers
+│   ├── globals.css     # Global styles
+│   ├── pages/         # Page components
+│   └── root-layout.js # Root layout component
+└── core/
+    ├── client/        # Client-side runtime and components
+    ├── config/        # Build configuration
+    ├── loaders/       # Custom loaders
+    ├── rsc-html-stream/ # RSC HTML streaming implementation
+    ├── scripts/       # Build scripts
+    └── server/        # RSC and SSR servers
 ```
-
-## Limitations
-
-- CSS solutions require manual configuration
-- No TypeScript support
-- No Hot Module Replacement (HMR)
-
-These features are out of scope for this template as it focuses on demonstrating basic RSC functionality.

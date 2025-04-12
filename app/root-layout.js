@@ -1,3 +1,5 @@
+import { FlashMessages } from './components/flash-messages';
+
 export default function RootLayout({ children }) {
   return (
     <html lang='en'>
@@ -5,9 +7,12 @@ export default function RootLayout({ children }) {
         <meta charSet='utf-8' />
         <meta name='viewport' content='width=device-width, initial-scale=1' />
         <title>COSMOS RSC</title>
-        <link rel='stylesheet' href='style.css' />
+        <link rel='stylesheet' href='/style.css' />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <FlashMessages />
+      </body>
     </html>
   );
 }

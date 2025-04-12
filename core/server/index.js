@@ -117,7 +117,7 @@ async function requestHandler(req, res) {
       const tree = createElement(
         RootLayout,
         null,
-        createElement(Page, { searchParams: req.query })
+        createElement(Page, { searchParams: { ...req.query } })
       );
 
       const webpackMap = await getReactClientManifest();
