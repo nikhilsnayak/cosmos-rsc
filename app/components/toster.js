@@ -50,10 +50,10 @@ export function Toaster() {
           message.type === 'error'
             ? { backgroundColor: '#ef4444' }
             : message.type === 'success'
-            ? { backgroundColor: '#10b981' }
-            : message.type === 'warning'
-            ? { backgroundColor: '#f59e0b' }
-            : { backgroundColor: '#3b82f6' };
+              ? { backgroundColor: '#10b981' }
+              : message.type === 'warning'
+                ? { backgroundColor: '#f59e0b' }
+                : { backgroundColor: '#3b82f6' };
 
         return (
           <div key={index} style={{ ...baseStyle, ...typeStyle }}>

@@ -45,7 +45,9 @@ parentPort.on('message', async (request) => {
     serverConsumerManifest
   );
 
-  const { SSRRouter } = await import('../../client/components/router/ssr-router.js');
+  const { SSRRouter } = await import(
+    '../../client/components/router/ssr-router.js'
+  );
 
   const htmlStream = renderToPipeableStream(
     createElement(SSRRouter, { initialState: { tree, flashMessages } }),
