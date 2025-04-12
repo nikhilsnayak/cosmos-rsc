@@ -5,6 +5,7 @@ require('@babel/register')({
   plugins: ['@babel/plugin-transform-modules-commonjs'],
 });
 
+const fs = require('fs');
 const express = require('express');
 const busboy = require('busboy');
 const { createElement } = require('react');
@@ -20,10 +21,13 @@ const {
 const { getReactClientManifest } = require('./lib/manifests');
 const { runWithAppStore, getAppStore } = require('./lib/app-store');
 const { getCookieString } = require('./lib/utils');
-const { BUILD_DIR, FIZZ_WORKER_PATH } = require('./lib/constants');
+const {
+  BUILD_DIR,
+  FIZZ_WORKER_PATH,
+  FAVICON_PATH,
+} = require('./lib/constants');
 const logger = require('./lib/logger');
 const { Slot } = require('../client/components/slot-provider');
-
 const RootLayout = require('../../app/root-layout').default;
 
 const PORT = 8000;
@@ -183,7 +187,11 @@ async function requestHandler(req, res) {
 
 app.get('*splat', async (req, res) => {
   if (req.path === '/favicon.ico') {
-    res.status(404).end();
+    if (fs.existsSync(FAVICON_PATH)) {
+      res.sendFile(FAVICON_PATH);
+    } else {
+      res.status(404).end();
+    }
     return;
   }
   await requestHandler(req, res);

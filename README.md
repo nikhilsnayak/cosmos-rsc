@@ -41,8 +41,9 @@ NODE_ENV=production npm run build
 
 ```sh
 ├── app/
-│   ├── globals.css      # Global styles
 │   ├── pages/           # Page components
+│   ├── globals.css      # Global styles
+│   ├── favicon.ico      # Favicon
 │   └── root-layout.js   # Root layout component (Not re-fetched during client side navigation)
 └── core/
     ├── client/          # Client-side runtime and components

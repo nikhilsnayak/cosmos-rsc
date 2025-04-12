@@ -1,6 +1,7 @@
 const path = require('path');
 
 const BUILD_DIR = path.resolve(__dirname, '../../../.cosmos-rsc');
+const FAVICON_PATH = path.resolve(__dirname, '../../../app/favicon.ico');
 
 const FIZZ_WORKER_PATH = path.resolve(__dirname, './fizz-worker.js');
 
@@ -16,4 +17,5 @@ module.exports = {
   FIZZ_WORKER_PATH,
   REACT_CLIENT_MANIFEST_PATH,
   REACT_SSR_MANIFEST_PATH,
+  FAVICON_PATH,
 };
