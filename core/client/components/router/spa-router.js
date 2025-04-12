@@ -1,4 +1,4 @@
-import { useActionState, useEffect, startTransition, useCallback } from 'react';
+import { useActionState, useEffect, startTransition } from 'react';
 import { RouterContext } from './index.js';
 import { routerReducer } from '../../lib/router-reducer.js';
 import { getFullPath } from '../../lib/utils.js';
@@ -40,14 +40,11 @@ export function SPARouter({ initialState, initialFlashMessages }) {
     };
   }, [dispatch]);
 
-  const push = useCallback(
-    (url) => {
-      startTransition(() => {
-        dispatch({ type: 'PUSH', payload: { url: getFullPath(url) } });
-      });
-    },
-    [dispatch]
-  );
+  const push = (url) => {
+    startTransition(() => {
+      dispatch({ type: 'PUSH', payload: { url: getFullPath(url) } });
+    });
+  };
 
   return (
     <RouterContext value={{ push, isTransitioning }}>

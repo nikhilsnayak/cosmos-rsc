@@ -1,6 +1,6 @@
 const path = require('path');
 const ReactServerWebpackPlugin = require('react-server-dom-webpack/plugin');
-
+const { reactCompilerLoader } = require('react-compiler-webpack');
 const isProduction = process.env.NODE_ENV === 'production';
 
 module.exports = {
@@ -15,19 +15,24 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              [
-                '@babel/preset-react',
-                {
-                  runtime: 'automatic',
-                },
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: [
+                [
+                  '@babel/preset-react',
+                  {
+                    runtime: 'automatic',
+                  },
+                ],
               ],
-            ],
+            },
           },
-        },
+          {
+            loader: reactCompilerLoader,
+          },
+        ],
       },
     ],
   },
