@@ -1,6 +1,6 @@
 require('react-server-dom-webpack/node-register')();
 require('@babel/register')({
-  ignore: [/[\\\/](.cosmos-rsc|node_modules)[\\\/]/],
+  ignore: [/[\\/](.cosmos-rsc|node_modules)[\\/]/],
   presets: [['@babel/preset-react', { runtime: 'automatic' }]],
   plugins: ['@babel/plugin-transform-modules-commonjs'],
 });

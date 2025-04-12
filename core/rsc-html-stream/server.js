@@ -87,6 +87,8 @@ async function writeRSCStream(rscStream, transform) {
         transform
       );
     } catch (err) {
+      console.log({ err });
+
       // If decoding fails, write as base64
       const base64 = JSON.stringify(Buffer.from(chunk).toString('base64'));
       writeChunk(

@@ -38,13 +38,16 @@ export function SPARouter({ initialState, initialFlashMessages }) {
       controller.abort();
       delete window.__cosmos_rsc.updateTree;
     };
-  }, []);
+  }, [dispatch]);
 
-  const push = useCallback((url) => {
-    startTransition(() => {
-      dispatch({ type: 'PUSH', payload: { url: getFullPath(url) } });
-    });
-  }, []);
+  const push = useCallback(
+    (url) => {
+      startTransition(() => {
+        dispatch({ type: 'PUSH', payload: { url: getFullPath(url) } });
+      });
+    },
+    [dispatch]
+  );
 
   return (
     <RouterContext value={{ push, isTransitioning }}>
