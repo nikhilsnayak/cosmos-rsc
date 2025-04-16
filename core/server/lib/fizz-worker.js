@@ -8,7 +8,7 @@ const { renderToPipeableStream } = require('react-dom/server');
 const { getReactSSRManifest } = require('./manifests');
 const { injectRSCPayload } = require('../../rsc-html-stream/server');
 
-register('./core/loaders/jsx.js', pathToFileURL('./'));
+register('./core/server/loaders/jsx.js', pathToFileURL('./'));
 
 parentPort.on('message', async (request) => {
   const htmlConsumerRSCStream = new PassThrough();
@@ -43,14 +43,11 @@ parentPort.on('message', async (request) => {
   const { rootLayout, tree, formState, flashMessages } =
     await createFromNodeStream(htmlConsumerRSCStream, serverConsumerManifest);
 
-  const { SSRRouter } = await import(
-    '../../client/components/router/ssr-router.js'
-  );
+  const { SSRApp } = await import('../../client/components/app/ssr-app.js');
 
   const htmlStream = renderToPipeableStream(
-    createElement(SSRRouter, {
-      initialState: { tree },
-      initialFlashMessages: flashMessages,
+    createElement(SSRApp, {
+      initialState: { tree, flashMessages },
       rootLayout,
     }),
     {

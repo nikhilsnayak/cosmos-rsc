@@ -1,7 +1,7 @@
 import { getRSCPayload } from './get-rsc-payload.js';
 import { getFullPath } from './utils.js';
 
-export async function routerReducer(prevState, action) {
+export async function appReducer(prevState, action) {
   switch (action.type) {
     case 'UPDATE': {
       const { tree } = action.payload;
@@ -9,7 +9,7 @@ export async function routerReducer(prevState, action) {
       const cache = new Map(prevState.cache);
       cache.set(getFullPath(window.location.href), tree);
 
-      return { tree, cache };
+      return { ...prevState, tree, cache };
     }
 
     case 'NAVIGATE': {
@@ -26,7 +26,7 @@ export async function routerReducer(prevState, action) {
       const cache = new Map(prevState.cache);
       cache.set(url, tree);
 
-      return { tree, cache };
+      return { ...prevState, tree, cache };
     }
 
     case 'PUSH': {
@@ -38,7 +38,7 @@ export async function routerReducer(prevState, action) {
 
       window.history.pushState(null, null, url);
 
-      return { tree, cache };
+      return { ...prevState, tree, cache };
     }
 
     default:

@@ -1,7 +1,7 @@
 const fs = require('fs');
 const webpack = require('webpack');
 const util = require('util');
-const config = require('../config/webpack.config');
+const config = require('./webpack.config');
 const { BUILD_DIR } = require('../server/lib/constants');
 
 fs.rmSync(BUILD_DIR, {

@@ -19,23 +19,12 @@ export async function callServer(id, args) {
     throw new Error('Failed to execute server function');
   }
 
-  const { tree, serverFunctionResult, flashMessages } =
-    await createFromReadableStream(response.body, {
+  const { serverFunctionResult } = await createFromReadableStream(
+    response.body,
+    {
       callServer,
-    });
-
-  if (typeof window.__cosmos_rsc?.updateTree !== 'function') {
-    throw new Error('Router was not mounted');
-  }
-
-  if (
-    typeof window.__cosmos_rsc?.flash === 'function' &&
-    flashMessages?.length
-  ) {
-    window.__cosmos_rsc.flash(...flashMessages);
-  }
-
-  window.__cosmos_rsc.updateTree(tree);
+    }
+  );
 
   return serverFunctionResult;
 }
