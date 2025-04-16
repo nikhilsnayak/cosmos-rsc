@@ -6,7 +6,7 @@
     "#cosmos-rsc/client": "./core/client/exports.js"
   },
   "scripts": {
-    "build": "node core/scripts/build.js && tailwindcss -i ./app/globals.css -o ./.cosmos-rsc/style.css",
+    "build": "node core/build/index.js && tailwindcss -i ./app/globals.css -o ./.cosmos-rsc/style.css",
     "server": "node --conditions react-server core/server/index.js",
     "start": "npm run build && npm run server",
     "format": "prettier . --write",

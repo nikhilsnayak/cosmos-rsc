@@ -1,4 +1,4 @@
-import { useRouter } from './router/index.js';
+import { useRouter } from './router-context.js';
 
 export function Link({ href, children, ...rest }) {
   const router = useRouter();

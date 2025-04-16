@@ -27,7 +27,7 @@ const {
   FAVICON_PATH,
 } = require('./lib/constants');
 const logger = require('./lib/logger');
-const { Slot } = require('../client/components/slot-provider');
+const { Slot } = require('../client/components/slot-context');
 const RootLayout = require('../../app/root-layout').default;
 
 const PORT = 8000;
