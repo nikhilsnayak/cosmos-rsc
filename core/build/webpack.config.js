@@ -10,6 +10,7 @@ module.exports = {
     path: path.resolve(__dirname, '../../.cosmos-rsc'),
     filename: 'client.js',
   },
+  devtool: isProduction ? false : 'source-map',
   module: {
     rules: [
       {

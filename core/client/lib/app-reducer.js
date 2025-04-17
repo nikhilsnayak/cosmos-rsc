@@ -1,3 +1,4 @@
+import { dispatchAppAction } from './app-dispatch.js';
 import { getRSCPayload } from './get-rsc-payload.js';
 import { postServerAction } from './post-server-action.js';
 import { getFullPath } from './utils.js';
@@ -48,19 +49,46 @@ export async function appReducer(prevState, action) {
 
       const path = getFullPath(window.location.href);
       try {
-        const { tree, serverActionResult, flashMessages } =
-          await postServerAction(id, args);
+        const {
+          tree,
+          serverActionResult,
+          flashMessages: newFlashMessages,
+        } = await postServerAction(id, args);
 
         resolve(serverActionResult);
 
         const cache = new Map(prevState.cache);
         cache.set(path, tree);
 
-        return { ...prevState, tree, cache, flashMessages };
+        newFlashMessages.forEach((message) => {
+          setTimeout(() => {
+            dispatchAppAction({
+              type: 'REMOVE_FLASH_MESSAGE',
+              payload: { id: message.id },
+            });
+          }, 5000);
+        });
+
+        const flashMessages = [...prevState.flashMessages, ...newFlashMessages];
+
+        return {
+          ...prevState,
+          tree,
+          cache,
+          flashMessages,
+        };
       } catch (error) {
         reject(error);
         return prevState;
       }
+    }
+
+    case 'REMOVE_FLASH_MESSAGE': {
+      const { id } = action.payload;
+      const flashMessages = prevState.flashMessages.filter(
+        (msg) => msg.id !== id
+      );
+      return { ...prevState, flashMessages };
     }
 
     default:

@@ -35,6 +35,7 @@
     "react": "^19.1.0",
     "react-compiler-webpack": "^0.2.0",
     "react-dom": "^19.1.0",
+    "react-scan": "^0.3.3",
     "react-server-dom-webpack": "^19.1.0",
     "server-only": "^0.0.1",
     "tailwindcss": "^4.1.3",
