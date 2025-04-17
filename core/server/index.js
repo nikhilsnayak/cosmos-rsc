@@ -67,20 +67,19 @@ async function requestHandler(req, res) {
     runWithAppStore(appStore, async () => {
       const { cookies, metadata, flashMessages } = getAppStore();
 
-      let serverFunctionResult;
+      let serverActionResult;
       let formState;
       if (req.method === 'POST') {
-        metadata.renderPhase = 'SERVER_FUNCTION';
+        metadata.renderPhase = 'SERVER_ACTION';
 
-        const bb = busboy({ headers: req.headers });
-        req.pipe(bb);
-
-        const serverFunctionId = req.headers['server-function-id'];
-        if (serverFunctionId) {
-          const [fileUrl, functionName] = serverFunctionId.split('#');
-          const serverFunction = require(fileURLToPath(fileUrl))[functionName];
+        const serverActionId = req.headers['server-action-id'];
+        if (serverActionId) {
+          const bb = busboy({ headers: req.headers });
+          req.pipe(bb);
+          const [fileUrl, functionName] = serverActionId.split('#');
+          const serverAction = require(fileURLToPath(fileUrl))[functionName];
           const args = await decodeReplyFromBusboy(bb);
-          serverFunctionResult = await serverFunction.apply(null, args);
+          serverActionResult = await serverAction.apply(null, args);
         } else {
           const fakeReq = new Request('http://localhost', {
             method: 'POST',
@@ -128,16 +127,19 @@ async function requestHandler(req, res) {
       }
 
       const webpackMap = await getReactClientManifest();
-      const rscStream = renderToPipeableStream(
-        { tree, serverFunctionResult, formState, flashMessages, rootLayout },
-        webpackMap,
-        {
-          onError: (error) => {
-            console.error('Render error:', error);
-            res.status(500).send('Internal Server Error');
-          },
-        }
-      );
+      const payload = {
+        tree,
+        serverActionResult,
+        formState,
+        flashMessages,
+        rootLayout,
+      };
+      const rscStream = renderToPipeableStream(payload, webpackMap, {
+        onError: (error) => {
+          console.error('Render error:', error);
+          res.status(500).send('Internal Server Error');
+        },
+      });
 
       if (req.headers.accept === 'text/x-component') {
         res.setHeader('Content-Type', 'text/x-component');

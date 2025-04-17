@@ -1,30 +1,26 @@
-import {
-  createFromReadableStream,
-  encodeReply,
-} from 'react-server-dom-webpack/client';
-import { getFullPath } from './utils.js';
+import { useEffect } from 'react';
+
+let serverActionDispatcher = null;
+
+export function useServerActionDispatcher(dispatch) {
+  useEffect(() => {
+    serverActionDispatcher = dispatch;
+  }, [dispatch]);
+}
 
 export async function callServer(id, args) {
-  const headers = new Headers();
-  headers.append('server-function-id', id);
-  headers.append('accept', 'text/x-component');
-
-  const response = await fetch(getFullPath(window.location.href), {
-    method: 'POST',
-    headers,
-    body: await encodeReply(args),
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to execute server function');
+  if (!serverActionDispatcher) {
+    throw new Error('Server action dispatcher is not set');
   }
 
-  const { serverFunctionResult } = await createFromReadableStream(
-    response.body,
-    {
-      callServer,
-    }
-  );
+  const { promise, resolve, reject } = Promise.withResolvers();
 
-  return serverFunctionResult;
+  serverActionDispatcher({
+    type: 'SERVER_ACTION',
+    payload: { id, args },
+    resolve,
+    reject,
+  });
+
+  return promise;
 }
