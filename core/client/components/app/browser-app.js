@@ -4,9 +4,12 @@ import { FlashContext } from '../flash-context.js';
 import { SlotContext } from '../slot-context.js';
 import { appReducer } from '../../lib/app-reducer.js';
 import { getFullPath } from '../../lib/utils.js';
+import { useServerActionDispatcher } from '../../lib/call-server.js';
 
 export function BrowserApp({ initialState, rootLayout }) {
   const [appState, dispatch] = useActionState(appReducer, initialState);
+
+  useServerActionDispatcher(dispatch);
 
   useEffect(() => {
     const controller = new AbortController();
