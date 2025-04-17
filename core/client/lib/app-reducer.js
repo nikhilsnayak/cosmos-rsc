@@ -1,3 +1,4 @@
+import { flashStore } from './flash-store.js';
 import { getRSCPayload } from './get-rsc-payload.js';
 import { postServerAction } from './post-server-action.js';
 import { getFullPath } from './utils.js';
@@ -56,7 +57,9 @@ export async function appReducer(prevState, action) {
         const cache = new Map(prevState.cache);
         cache.set(path, tree);
 
-        return { ...prevState, tree, cache, flashMessages };
+        flashStore.push(...flashMessages);
+
+        return { ...prevState, tree, cache };
       } catch (error) {
         reject(error);
         return prevState;

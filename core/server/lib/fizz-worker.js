@@ -8,7 +8,7 @@ const { renderToPipeableStream } = require('react-dom/server');
 const { getReactSSRManifest } = require('./manifests');
 const { injectRSCPayload } = require('../../rsc-html-stream/server');
 
-register('./core/server/loaders/jsx.mjs', pathToFileURL('./'));
+register('./core/server/loaders/jsx.js', pathToFileURL('./'));
 
 parentPort.on('message', async (request) => {
   const htmlConsumerRSCStream = new PassThrough();

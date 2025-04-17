@@ -1,5 +1,4 @@
 import { RouterContext } from '../router-context.js';
-import { FlashContext } from '../flash-context.js';
 import { SlotContext } from '../slot-context.js';
 
 export function SSRApp({ initialState, rootLayout }) {
@@ -9,9 +8,7 @@ export function SSRApp({ initialState, rootLayout }) {
 
   return (
     <RouterContext value={{ push }}>
-      <FlashContext value={initialState.flashMessages}>
-        <SlotContext value={initialState.tree}>{rootLayout}</SlotContext>
-      </FlashContext>
+      <SlotContext value={initialState.tree}>{rootLayout}</SlotContext>
     </RouterContext>
   );
 }

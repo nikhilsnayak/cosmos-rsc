@@ -1,6 +1,8 @@
-import { Link } from '#cosmos-rsc/client';
+import { Link } from '../../core/client/exports.js';
+import { flash } from '#cosmos-rsc/server';
 
 export default function Page() {
+  flash({ message: 'Hello' });
   return (
     <div className='mx-auto max-w-4xl px-4 py-12'>
       <h1 className='mb-8 text-4xl font-bold'>COSMOS RSC Features</h1>

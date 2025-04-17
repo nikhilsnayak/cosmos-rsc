@@ -6,6 +6,7 @@ import { BrowserApp } from './components/app/browser-app';
 import { callServer } from './lib/call-server';
 import { getFullPath } from './lib/utils';
 import { StrictMode } from 'react';
+import { flashStore } from './lib/flash-store';
 
 async function hydrateDocument() {
   const { rootLayout, tree, formState, flashMessages } =
@@ -13,9 +14,10 @@ async function hydrateDocument() {
       callServer,
     });
 
+  flashStore.push(...flashMessages);
+
   const initialState = {
     tree,
-    flashMessages,
     cache: new Map([[getFullPath(window.location.href), tree]]),
   };
 

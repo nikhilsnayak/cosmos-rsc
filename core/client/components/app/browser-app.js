@@ -1,6 +1,5 @@
 import { useActionState, useEffect, startTransition } from 'react';
 import { RouterContext } from '../router-context.js';
-import { FlashContext } from '../flash-context.js';
 import { SlotContext } from '../slot-context.js';
 import { appReducer } from '../../lib/app-reducer.js';
 import { getFullPath } from '../../lib/utils.js';
@@ -40,9 +39,7 @@ export function BrowserApp({ initialState, rootLayout }) {
 
   return (
     <RouterContext value={{ push }}>
-      <FlashContext value={appState.flashMessages}>
-        <SlotContext value={appState.tree}>{rootLayout}</SlotContext>
-      </FlashContext>
+      <SlotContext value={appState.tree}>{rootLayout}</SlotContext>
     </RouterContext>
   );
 }
