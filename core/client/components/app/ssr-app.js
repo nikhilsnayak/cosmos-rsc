@@ -3,13 +3,22 @@ import { FlashContext } from '../flash-context.js';
 import { SlotContext } from '../slot-context.js';
 
 export function SSRApp({ initialState, rootLayout }) {
-  const push = () => {
-    throw new Error('Cannot call `router.push` during SSR');
+  const router = {
+    push: () => {
+      throw new Error('Cannot call `router.push` during SSR');
+    },
+  };
+
+  const flash = {
+    messages: initialState.flashMessages,
+    remove: () => {
+      throw new Error('Cannot call `flash.remove` during SSR');
+    },
   };
 
   return (
-    <RouterContext value={{ push }}>
-      <FlashContext value={initialState.flashMessages}>
+    <RouterContext value={router}>
+      <FlashContext value={flash}>
         <SlotContext value={initialState.tree}>{rootLayout}</SlotContext>
       </FlashContext>
     </RouterContext>

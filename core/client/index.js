@@ -1,3 +1,4 @@
+import { scan as reactScan } from 'react-scan';
 import { hydrateRoot } from 'react-dom/client';
 import { createFromReadableStream } from 'react-server-dom-webpack/client';
 import { ErrorBoundary } from './components/error-boundary';
@@ -32,4 +33,5 @@ async function hydrateDocument() {
   });
 }
 
+reactScan({ enabled: true });
 hydrateDocument();

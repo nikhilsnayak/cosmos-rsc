@@ -1,3 +1,4 @@
+import { Link } from '#cosmos-rsc/client';
 import { cookies } from '#cosmos-rsc/server';
 import { contactAction } from '../../actions/form-actions';
 import { SubmitButton } from '../../components/submit-button';
@@ -9,6 +10,10 @@ export default function FormsDemo() {
   return (
     <div className='mx-auto max-w-4xl px-4 py-12'>
       <h1 className='mb-8 text-3xl font-bold'>Server Actions Form Demo</h1>
+
+      <Link href='/' className='text-blue-500 hover:underline'>
+        Back to Home
+      </Link>
 
       <div className='space-y-8'>
         {lastSubmission && (
@@ -48,7 +53,7 @@ export default function FormsDemo() {
                 Email
               </label>
               <input
-                type='email'
+                type='text'
                 id='email'
                 name='email'
                 className='mt-1 block w-full rounded-md border-gray-300 px-4 py-2 shadow-sm focus:border-blue-500 focus:ring-blue-500'

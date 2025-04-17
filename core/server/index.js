@@ -128,11 +128,11 @@ async function requestHandler(req, res) {
 
       const webpackMap = await getReactClientManifest();
       const payload = {
+        rootLayout,
         tree,
         serverActionResult,
         formState,
         flashMessages,
-        rootLayout,
       };
       const rscStream = renderToPipeableStream(payload, webpackMap, {
         onError: (error) => {

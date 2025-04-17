@@ -1,21 +1,9 @@
-import { useEffect } from 'react';
-
-let serverActionDispatcher = null;
-
-export function useServerActionDispatcher(dispatch) {
-  useEffect(() => {
-    serverActionDispatcher = dispatch;
-  }, [dispatch]);
-}
+import { dispatchAppAction } from './app-dispatch';
 
 export async function callServer(id, args) {
-  if (!serverActionDispatcher) {
-    throw new Error('Server action dispatcher is not set');
-  }
-
   const { promise, resolve, reject } = Promise.withResolvers();
 
-  serverActionDispatcher({
+  dispatchAppAction({
     type: 'SERVER_ACTION',
     payload: { id, args },
     resolve,
