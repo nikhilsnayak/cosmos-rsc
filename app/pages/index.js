@@ -46,6 +46,18 @@ export default function Page() {
                 Form handling with server actions
               </p>
             </li>
+
+            <li>
+              <Link
+                href='/features/data-fetching-using-server-fn'
+                className='text-blue-600 hover:underline'
+              >
+                Data Fetching with Server Functions
+              </Link>
+              <p className='mt-1 text-gray-600'>
+                Fetching data using server functions
+              </p>
+            </li>
           </ul>
         </section>
       </div>

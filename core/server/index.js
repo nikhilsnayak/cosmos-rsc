@@ -28,6 +28,10 @@ const {
 } = require('./lib/constants');
 const logger = require('./lib/logger');
 const { Slot } = require('../client/components/slot-context');
+const { ServerFunctionRequest } = require('../common/server-function-request');
+const {
+  ServerFunctionResponse,
+} = require('../common/server-function-response');
 const RootLayout = require('../../app/root-layout').default;
 
 const PORT = 8000;
@@ -66,6 +70,46 @@ async function requestHandler(req, res) {
 
     runWithAppStore(appStore, async () => {
       const { cookies, metadata, flashMessages } = getAppStore();
+
+      const serverFunctionId = req.headers['server-function-id'];
+      if (req.method === 'GET' && serverFunctionId) {
+        metadata.renderPhase = 'SERVER_FUNCTION';
+        const [fileUrl, functionName] = serverFunctionId.split('#');
+        const serverFunction = require(fileURLToPath(fileUrl))[functionName];
+        const searchParams = new URLSearchParams(req.query);
+
+        const serverFunctionRequest = new ServerFunctionRequest({
+          searchParams,
+        });
+        const serverFunctionResponse = await serverFunction(
+          serverFunctionRequest
+        );
+
+        if (!(serverFunctionResponse instanceof ServerFunctionResponse)) {
+          res
+            .status(500)
+            .send('Server function must return a ServerFunctionResponse');
+          return;
+        }
+
+        if (cookies.outgoing.size > 0) {
+          const cookieString = getCookieString([
+            ...Array.from(cookies.incoming),
+            ...Array.from(cookies.outgoing),
+          ]);
+          res.setHeader('Set-Cookie', cookieString);
+        }
+
+        if (serverFunctionResponse.json) {
+          res.setHeader('Content-Type', 'application/json');
+          res
+            .status(serverFunctionResponse.status ?? 200)
+            .send(JSON.stringify(serverFunctionResponse.json));
+        } else {
+          res.status(serverFunctionResponse.status ?? 200).end();
+        }
+        return;
+      }
 
       let serverActionResult;
       let formState;
