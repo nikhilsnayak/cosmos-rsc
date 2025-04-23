@@ -4,7 +4,6 @@ import globals from 'globals';
 import pluginReact from 'eslint-plugin-react';
 import eslintConfigPrettier from 'eslint-config-prettier/flat';
 import reactHooks from 'eslint-plugin-react-hooks';
-import reactCompiler from 'eslint-plugin-react-compiler';
 
 export default defineConfig([
   {
@@ -24,12 +23,11 @@ export default defineConfig([
   },
   pluginReact.configs.flat.recommended,
   pluginReact.configs.flat['jsx-runtime'],
-  reactHooks.configs['recommended-latest'],
-  reactCompiler.configs.recommended,
+  reactHooks.configs.recommended,
   {
     rules: {
       'react/prop-types': 'off',
-      'react-compiler/react-compiler': 'error',
+      'react-hooks/react-compiler': 'error',
     },
   },
   eslintConfigPrettier,
