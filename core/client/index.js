@@ -5,20 +5,16 @@ import { rscStream } from '../rsc-html-stream/client';
 import { BrowserApp } from './components/app/browser-app';
 import { callServer } from './lib/call-server';
 import { getFullPath } from './lib/utils';
+import { routerCache } from './lib/router-cache';
 import { StrictMode } from 'react';
 
 async function hydrateDocument() {
   const { rootLayout, tree, formState, flashMessages } =
-    await createFromReadableStream(rscStream, {
-      callServer,
-    });
+    await createFromReadableStream(rscStream, { callServer });
 
-  const initialState = {
-    tree,
-    flashMessages,
-    cache: new Map([[getFullPath(window.location.href), tree]]),
-  };
+  routerCache.set(getFullPath(window.location.href), tree);
 
+  const initialState = { tree, flashMessages };
   const app = (
     <StrictMode>
       <ErrorBoundary>
@@ -27,9 +23,7 @@ async function hydrateDocument() {
     </StrictMode>
   );
 
-  hydrateRoot(document, app, {
-    formState,
-  });
+  hydrateRoot(document, app, { formState });
 }
 
 hydrateDocument();

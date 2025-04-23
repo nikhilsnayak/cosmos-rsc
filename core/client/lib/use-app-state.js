@@ -2,6 +2,7 @@ import { startTransition, useActionState, useEffect } from 'react';
 import { appReducer } from './app-reducer.js';
 import { getFullPath } from './utils.js';
 import { useAppDispatch } from './app-dispatch.js';
+import { APP_ACTION } from './app-action.js';
 
 export function useAppState(initialState) {
   const [appState, dispatch] = useActionState(appReducer, initialState);
@@ -12,8 +13,8 @@ export function useAppState(initialState) {
     const handlePopState = () => {
       startTransition(() => {
         dispatch({
-          type: 'NAVIGATE',
-          payload: { url: getFullPath(window.location.href) },
+          type: APP_ACTION.BROWSER_NAVIGATION,
+          payload: { path: getFullPath(window.location.href) },
         });
       });
     };
@@ -30,7 +31,7 @@ export function useAppState(initialState) {
       setTimeout(() => {
         startTransition(() => {
           dispatch({
-            type: 'REMOVE_FLASH_MESSAGE',
+            type: APP_ACTION.REMOVE_FLASH_MESSAGE,
             payload: { id: message.id },
           });
         });
