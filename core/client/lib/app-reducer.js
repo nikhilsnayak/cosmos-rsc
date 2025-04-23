@@ -1,49 +1,47 @@
+import { APP_ACTION, NAVIGATION_KIND } from './app-action.js';
 import { dispatchAppAction } from './app-dispatch.js';
 import { getRSCPayload } from './get-rsc-payload.js';
 import { postServerAction } from './post-server-action.js';
+import { routerCache } from './router-cache.js';
 import { getFullPath } from './utils.js';
 
 export async function appReducer(prevState, action) {
   switch (action.type) {
-    case 'UPDATE': {
-      const { tree } = action.payload;
+    case APP_ACTION.BROWSER_NAVIGATION: {
+      const { path } = action.payload;
 
-      const cache = new Map(prevState.cache);
-      cache.set(getFullPath(window.location.href), tree);
-
-      return { ...prevState, tree, cache };
-    }
-
-    case 'NAVIGATE': {
-      const { url } = action.payload;
-
-      if (prevState.cache.has(url)) {
+      if (routerCache.has(path)) {
         return {
           ...prevState,
-          tree: prevState.cache.get(url),
+          tree: routerCache.get(path),
         };
       }
 
-      const tree = await getRSCPayload(url);
-      const cache = new Map(prevState.cache);
-      cache.set(url, tree);
+      const tree = await getRSCPayload(path);
+      routerCache.set(path, tree);
 
-      return { ...prevState, tree, cache };
+      return {
+        ...prevState,
+        tree,
+        path,
+        navigationKind: NAVIGATION_KIND.BROWSER_NAVIGATION,
+      };
     }
 
-    case 'PUSH': {
-      const { url } = action.payload;
-      const tree = await getRSCPayload(url);
+    case APP_ACTION.ROUTER_PUSH: {
+      const { path } = action.payload;
+      const tree = await getRSCPayload(path);
+      routerCache.set(path, tree);
 
-      const cache = new Map(prevState.cache);
-      cache.set(url, tree);
-
-      window.history.pushState(null, null, url);
-
-      return { ...prevState, tree, cache };
+      return {
+        ...prevState,
+        tree,
+        path,
+        navigationKind: NAVIGATION_KIND.ROUTER_PUSH,
+      };
     }
 
-    case 'SERVER_ACTION': {
+    case APP_ACTION.SERVER_ACTION: {
       const { id, args } = action.payload;
       const { resolve, reject } = action;
 
@@ -56,14 +54,11 @@ export async function appReducer(prevState, action) {
         } = await postServerAction(id, args);
 
         resolve(serverActionResult);
-
-        const cache = new Map(prevState.cache);
-        cache.set(path, tree);
-
+        routerCache.set(path, tree);
         newFlashMessages.forEach((message) => {
           setTimeout(() => {
             dispatchAppAction({
-              type: 'REMOVE_FLASH_MESSAGE',
+              type: APP_ACTION.REMOVE_FLASH_MESSAGE,
               payload: { id: message.id },
             });
           }, 5000);
@@ -74,7 +69,6 @@ export async function appReducer(prevState, action) {
         return {
           ...prevState,
           tree,
-          cache,
           flashMessages,
         };
       } catch (error) {
@@ -83,11 +77,11 @@ export async function appReducer(prevState, action) {
       }
     }
 
-    case 'REMOVE_FLASH_MESSAGE': {
+    case APP_ACTION.REMOVE_FLASH_MESSAGE: {
       const { id } = action.payload;
-      const flashMessages = prevState.flashMessages.filter(
-        (msg) => msg.id !== id
-      );
+      const flashMessages = prevState.flashMessages.filter((msg) => {
+        return msg.id !== id;
+      });
       return { ...prevState, flashMessages };
     }
 
