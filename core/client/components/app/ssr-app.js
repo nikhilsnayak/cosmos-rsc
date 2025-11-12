@@ -1,5 +1,4 @@
 import { RouterContext } from '../router-context.js';
-import { FlashContext } from '../flash-context.js';
 import { SlotContext } from '../slot-context.js';
 
 export function SSRApp({ initialState, rootLayout }) {
@@ -9,18 +8,9 @@ export function SSRApp({ initialState, rootLayout }) {
     },
   };
 
-  const flash = {
-    messages: initialState.flashMessages,
-    remove: () => {
-      throw new Error('Cannot call `flash.remove` during SSR');
-    },
-  };
-
   return (
     <RouterContext value={router}>
-      <FlashContext value={flash}>
-        <SlotContext value={initialState.tree}>{rootLayout}</SlotContext>
-      </FlashContext>
+      <SlotContext value={initialState.tree}>{rootLayout}</SlotContext>
     </RouterContext>
   );
 }

@@ -26,18 +26,5 @@ export function useAppState(initialState) {
     };
   }, []);
 
-  useEffect(() => {
-    initialState.flashMessages.forEach((message) => {
-      setTimeout(() => {
-        startTransition(() => {
-          dispatch({
-            type: APP_ACTION.REMOVE_FLASH_MESSAGE,
-            payload: { id: message.id },
-          });
-        });
-      }, 5000);
-    });
-  }, [initialState.flashMessages]);
-
   return appState;
 }

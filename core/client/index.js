@@ -9,12 +9,14 @@ import { routerCache } from './lib/router-cache';
 import { StrictMode } from 'react';
 
 async function hydrateDocument() {
-  const { rootLayout, tree, formState, flashMessages } =
-    await createFromReadableStream(rscStream, { callServer });
+  const { rootLayout, tree, formState } = await createFromReadableStream(
+    rscStream,
+    { callServer }
+  );
 
   routerCache.set(getFullPath(window.location.href), tree);
 
-  const initialState = { tree, flashMessages };
+  const initialState = { tree };
   const app = (
     <StrictMode>
       <ErrorBoundary>
