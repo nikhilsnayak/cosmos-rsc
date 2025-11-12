@@ -1,5 +1,5 @@
-import { Link } from '#cosmos-rsc/client';
 import { cookies } from '#cosmos-rsc/server';
+import { NavigationTransition } from '../../components/navigation-transition';
 import { contactAction } from '../../actions/form-actions';
 import { SubmitButton } from '../../components/submit-button';
 
@@ -9,11 +9,13 @@ export default function FormsDemo() {
 
   return (
     <div className='mx-auto max-w-4xl px-4 py-12'>
-      <h1 className='mb-8 text-3xl font-bold'>Server Actions Form Demo</h1>
+      <NavigationTransition>
+        <h1 className='mb-8 text-3xl font-bold'>Server Actions Form Demo</h1>
+      </NavigationTransition>
 
-      <Link href='/' className='text-blue-500 hover:underline'>
+      <a href='/' className='text-blue-500 hover:underline'>
         Back to Home
-      </Link>
+      </a>
 
       <div className='space-y-8'>
         {lastSubmission && (

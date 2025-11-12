@@ -1,4 +1,4 @@
-import { APP_ACTION, NAVIGATION_KIND } from './app-action.js';
+import { APP_ACTION } from './app-action.js';
 import { getRSCPayload } from './get-rsc-payload.js';
 import { postServerAction } from './post-server-action.js';
 import { routerCache } from './router-cache.js';
@@ -6,13 +6,14 @@ import { getFullPath } from './utils.js';
 
 export async function appReducer(prevState, action) {
   switch (action.type) {
-    case APP_ACTION.BROWSER_NAVIGATION: {
-      const { path } = action.payload;
+    case APP_ACTION.NAVIGATE: {
+      const { path, navigationType, commitPendingNavigation } = action.payload;
 
-      if (routerCache.has(path)) {
+      if (navigationType === 'traverse' && routerCache.has(path)) {
         return {
           ...prevState,
           tree: routerCache.get(path),
+          commitPendingNavigation,
         };
       }
 
@@ -22,21 +23,7 @@ export async function appReducer(prevState, action) {
       return {
         ...prevState,
         tree,
-        path,
-        navigationKind: NAVIGATION_KIND.BROWSER_NAVIGATION,
-      };
-    }
-
-    case APP_ACTION.ROUTER_PUSH: {
-      const { path } = action.payload;
-      const tree = await getRSCPayload(path);
-      routerCache.set(path, tree);
-
-      return {
-        ...prevState,
-        tree,
-        path,
-        navigationKind: NAVIGATION_KIND.ROUTER_PUSH,
+        commitPendingNavigation,
       };
     }
 

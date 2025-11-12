@@ -1,5 +1,6 @@
 // This component can only run on the server
 import { cookies } from '#cosmos-rsc/server';
+import { NavigationTransition } from '../../components/navigation-transition';
 
 // Simulated database call
 async function fetchUserData() {
@@ -68,7 +69,9 @@ async function WeatherWidget() {
 export default function ServerComponentsDemo() {
   return (
     <div className='mx-auto max-w-4xl px-4 py-12'>
-      <h1 className='mb-8 text-3xl font-bold'>Server Components Demo</h1>
+      <NavigationTransition>
+        <h1 className='mb-8 text-3xl font-bold'>Server Components Demo</h1>
+      </NavigationTransition>
 
       <div className='space-y-8'>
         <section>

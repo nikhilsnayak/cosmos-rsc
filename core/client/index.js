@@ -16,7 +16,9 @@ async function hydrateDocument() {
 
   routerCache.set(getFullPath(window.location.href), tree);
 
-  const initialState = { tree };
+  const commitPendingNavigation = () => {};
+
+  const initialState = { tree, commitPendingNavigation };
   const app = (
     <StrictMode>
       <ErrorBoundary>

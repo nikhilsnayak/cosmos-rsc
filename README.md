@@ -6,7 +6,7 @@ COSMOS RSC is a React Server Component (RSC) template designed to showcase the f
 
 - React Server Components (RSC) implementation with **webpack** bundler
 - Server-side streaming rendering
-- Client-side navigation with suspense enabled router
+- Client-side navigation with suspense enabled router using the [Navigation API](https://developer.mozilla.org/en-US/docs/Web/API/Navigation_API)
 - Form handling with server actions
 - Basic file-system based routing using pages directory
 - Pre-configured Tailwind CSS for styling
