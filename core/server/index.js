@@ -111,6 +111,7 @@ async function requestHandler(req, res) {
       } catch (error) {
         logger.error(`Failed to import page: ${pagePath}`, error);
         res.status(500).send('Internal Server Error');
+        return;
       }
 
       if (!Page) {
