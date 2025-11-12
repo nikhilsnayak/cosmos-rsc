@@ -1,9 +1,4 @@
-import { FlashMessages } from './components/flash-messages';
-import { flash } from '#cosmos-rsc/server';
-
 export default function RootLayout({ children }) {
-  flash({ message: 'Hello World From Server' });
-
   return (
     <html lang='en'>
       <head>
@@ -12,10 +7,7 @@ export default function RootLayout({ children }) {
         <title>COSMOS RSC</title>
         <link rel='stylesheet' href='/style.css' />
       </head>
-      <body>
-        {children}
-        <FlashMessages />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

@@ -1,6 +1,6 @@
 'use server';
 
-import { cookies, flash } from '#cosmos-rsc/server';
+import { cookies } from '#cosmos-rsc/server';
 
 export async function contactAction(formData) {
   // Simulate server processing
@@ -12,7 +12,6 @@ export async function contactAction(formData) {
 
   // Simple validation
   if (!name || !email || !message) {
-    flash({ type: 'error', message: 'All fields are required' });
     return { success: false };
   }
 
@@ -27,12 +26,6 @@ export async function contactAction(formData) {
     name,
     email,
     message,
-  });
-
-  // Add success flash message
-  flash({
-    type: 'success',
-    message: `Thank you ${name}! Your message has been received.`,
   });
 
   return { success: true };

@@ -36,20 +36,3 @@ To build the project for production, run:
 ```sh
 NODE_ENV=production npm run build
 ```
-
-## Project Structure
-
-```sh
-├── app/
-│   ├── pages/           # Page components
-│   ├── globals.css      # Global styles
-│   ├── favicon.ico      # Favicon
-│   └── root-layout.js   # Root layout component (Not re-fetched during client side navigation)
-└── core/
-    ├── client/          # Client-side runtime and components
-    ├── config/          # Build configuration
-    ├── loaders/         # Custom loaders
-    ├── rsc-html-stream/ # RSC HTML streaming implementation
-    ├── scripts/         # Build scripts
-    └── server/          # RSC and SSR servers
-```

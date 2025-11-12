@@ -88,10 +88,6 @@ export default function FormsDemo() {
           </p>
           <ul className='mt-2 ml-6 list-disc space-y-2'>
             <li>Module-level server actions (defined in a separate file)</li>
-            <li>
-              Flash messages for success/error feedback (auto-dismissing after 5
-              seconds only if JS is enabled)
-            </li>
             <li>Cookie storage for tracking last submission time</li>
           </ul>
         </section>
