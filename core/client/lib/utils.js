@@ -14,6 +14,9 @@ export function shouldNotInterceptNavigation(navigationEvent) {
     navigationEvent.downloadRequest ||
     // If this is a form submission,
     // let that go to the server.
-    navigationEvent.formData
+    navigationEvent.formData ||
+    // If this is a React transition,
+    // let react handle the transition. x-ref: https://github.com/facebook/react/blob/1ea46df8ba9d7d90a13c8668c2642cb21a259aa5/packages/react-dom/src/client/ReactDOMDefaultTransitionIndicator.js#L68
+    navigationEvent.info === 'react-transition'
   );
 }
