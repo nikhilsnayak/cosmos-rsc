@@ -195,6 +195,10 @@ app.get('*splat', async (req, res) => {
     }
     return;
   }
+  if (req.path === '/.well-known/appspecific/com.chrome.devtools.json') {
+    res.status(404).end();
+    return;
+  }
   await requestHandler(req, res);
 });
 

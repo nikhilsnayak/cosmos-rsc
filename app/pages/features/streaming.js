@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { NavigationTransition } from '../../components/navigation-transition';
 
 // Simulated slow data fetching component
 async function SlowData({ delay, label }) {
@@ -24,7 +25,9 @@ function LoadingCard() {
 export default function StreamingDemo() {
   return (
     <div className='mx-auto max-w-4xl px-4 py-12'>
-      <h1 className='mb-8 text-3xl font-bold'>Streaming SSR Demo</h1>
+      <NavigationTransition>
+        <h1 className='mb-8 text-3xl font-bold'>Streaming SSR Demo</h1>
+      </NavigationTransition>
 
       <div className='space-y-8'>
         <section>

@@ -1,9 +1,11 @@
-import { Link } from '#cosmos-rsc/client';
+import { NavigationTransition } from '../components/navigation-transition';
 
 export default function Page() {
   return (
     <div className='mx-auto max-w-4xl px-4 py-12'>
-      <h1 className='mb-8 text-4xl font-bold'>COSMOS RSC Features</h1>
+      <NavigationTransition>
+        <h1 className='mb-8 text-4xl font-bold'>COSMOS RSC Features</h1>
+      </NavigationTransition>
       <div className='space-y-6'>
         <section>
           <h2 className='mb-4 text-2xl font-semibold'>
@@ -11,34 +13,34 @@ export default function Page() {
           </h2>
           <ul className='space-y-3'>
             <li>
-              <Link
+              <a
                 href='/features/server-components'
                 className='text-blue-600 hover:underline'
               >
                 Server Components Demo
-              </Link>
+              </a>
               <p className='mt-1 text-gray-600'>
                 Showcase of React Server Components with async data fetching
               </p>
             </li>
             <li>
-              <Link
+              <a
                 href='/features/streaming'
                 className='text-blue-600 hover:underline'
               >
                 Streaming SSR Demo
-              </Link>
+              </a>
               <p className='mt-1 text-gray-600'>
                 Server-side streaming rendering with Suspense
               </p>
             </li>
             <li>
-              <Link
+              <a
                 href='/features/forms'
                 className='text-blue-600 hover:underline'
               >
                 Server Actions Form Demo
-              </Link>
+              </a>
               <p className='mt-1 text-gray-600'>
                 Form handling with server actions
               </p>
