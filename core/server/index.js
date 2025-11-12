@@ -136,7 +136,7 @@ async function requestHandler(req, res) {
       const rscStream = renderToPipeableStream(payload, webpackMap, {
         onError: (error) => {
           console.error('Render error:', error);
-          res.status(500).send('Internal Server Error');
+          res.end();
         },
       });
 
