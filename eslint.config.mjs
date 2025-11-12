@@ -23,12 +23,11 @@ export default defineConfig([
   },
   pluginReact.configs.flat.recommended,
   pluginReact.configs.flat['jsx-runtime'],
-  reactHooks.configs.recommended,
+  reactHooks.configs.flat.recommended,
+  eslintConfigPrettier,
   {
     rules: {
       'react/prop-types': 'off',
-      'react-hooks/react-compiler': 'error',
     },
   },
-  eslintConfigPrettier,
 ]);
