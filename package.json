@@ -33,12 +33,12 @@
     "postcss-loader": "^8.2.0",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.1",
-    "react": "^19.3.0-canary-1ea46df8-20251111",
-    "react-compiler-webpack": "^0.2.1",
-    "react-dom": "^19.3.0-canary-1ea46df8-20251111",
-    "react-server-dom-webpack": "^19.3.0-canary-1ea46df8-20251111",
+    "react": "^19.3.0-canary-eb89912e-20251118",
+    "react-compiler-webpack": "^1.0.0",
+    "react-dom": "^19.3.0-canary-eb89912e-20251118",
+    "react-server-dom-webpack": "^19.3.0-canary-eb89912e-20251118",
     "server-only": "^0.0.1",
     "tailwindcss": "^4.1.17",
-    "webpack": "^5.102.1"
+    "webpack": "^5.103.0"
   }
 }

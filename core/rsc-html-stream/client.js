@@ -14,6 +14,7 @@ export const rscStream = new ReadableStream({
     };
     window.__RSC_PAYLOAD ||= [];
     window.__RSC_PAYLOAD.forEach(handleChunk);
+    window.__RSC_PAYLOAD.length = 0;
     window.__RSC_PAYLOAD.push = (chunk) => {
       handleChunk(chunk);
     };
