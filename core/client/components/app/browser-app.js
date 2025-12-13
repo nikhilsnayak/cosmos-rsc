@@ -77,7 +77,7 @@ export function BrowserApp({ initialState, rootLayout }) {
 
   useLayoutEffect(() => {
     appState.commitPendingNavigation();
-  }, [appState.commitPendingNavigation]);
+  }, [appState]);
 
   const router = {
     push: (url) => {
